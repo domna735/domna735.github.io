@@ -1,0 +1,7 @@
+# Keep private/source documents out of the public GitHub Pages repo
+web page reference data/
+
+# Common OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
