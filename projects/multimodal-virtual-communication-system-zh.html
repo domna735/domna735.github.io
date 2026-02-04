@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-HK">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>多模態虛擬溝通系統（MVP）— 馬啟崙（Donovan Ma）</title>
+    <meta
+      name="description"
+      content="一個以示範為先（demo-first）的即時多模態 AI 互動原型：整合表情辨識、persona 對話、語音合成，以及選用的語音辨識與語調特徵分析，並提供 UI 叠加與會話日誌。"
+    />
+
+    <link rel="alternate" hreflang="en" href="multimodal-virtual-communication-system.html" />
+    <link rel="alternate" hreflang="zh-HK" href="multimodal-virtual-communication-system-zh.html" />
+
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" href="data:," />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">跳到內容</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../index-zh.html#top" aria-label="返回主頁">馬啟崙 Donovan Ma</a>
+          <span class="brand-sub">資訊保安 · 機器學習／電腦視覺 · 即時系統</span>
+        </div>
+
+        <nav class="nav" aria-label="主導覽">
+          <a class="nav-link" href="../index-zh.html#projects">項目</a>
+          <a class="nav-link" href="../index-zh.html#education">教育</a>
+          <a class="nav-link" href="../index-zh.html#skills">技能</a>
+          <a class="nav-link" href="../index-zh.html#experience">經驗</a>
+          <a class="nav-link" href="../index-zh.html#contact">聯絡</a>
+          <a class="nav-link" href="multimodal-virtual-communication-system.html" lang="en">EN</a>
+          <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="切換主題">Theme</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">重點項目</p>
+          <h1 class="hero-title">多模態虛擬溝通系統（MVP）</h1>
+          <p class="hero-lede">一個以示範為先（demo-first）的即時多模態 AI 互動原型。</p>
+
+          <div class="hero-cta">
+            <a class="btn" href="https://github.com/domna735/Multimodal-Virtual-Communication-System" target="_blank" rel="noopener">GitHub</a>
+            <a class="btn btn-ghost" href="../index-zh.html#projects">返回項目列表</a>
+          </div>
+
+          <div class="callout">
+            <strong>目標：</strong>建立一個可運行、可展示的系統（而非只做單一模型）—— 能夠「看、聽、說、回應」，並在即時互動中維持一致的 persona 行為。
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="overview-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="overview-title">概覽</h2>
+            <p class="muted">以離線優先（offline-first）、模組化與 Windows 友善為設計取向（支援 DirectML 路徑）。</p>
+          </div>
+
+          <div class="prose">
+            <p>本 MVP 以示範可運行為優先，整合以下能力於單一應用：</p>
+            <ul class="bullets">
+              <li>面部表情辨識（FER）</li>
+              <li>persona 感知的對話生成</li>
+              <li>語音輸出（TTS）</li>
+              <li>語音輸入（STT，選用）</li>
+              <li>語調／聲音情緒（prosody／voice mood）分析（選用）</li>
+              <li>即時 UI 叠加 + 會話日誌（session logging）</li>
+            </ul>
+            <p>
+              系統預設以離線方案確保可運行；在環境與金鑰允許時，可切換至雲端後端以提升互動品質（並保留失效時的降級／回退策略）。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="features-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="features-title">功能</h2>
+          </div>
+
+          <div class="cards">
+            <article class="card">
+              <div class="card-head">
+                <h3>即時面部表情辨識（FER）</h3>
+                <p class="tags">Webcam · Distilled ONNX student · YuNet · EMA / hysteresis / voting</p>
+              </div>
+              <ul class="bullets">
+                <li>以 webcam 進行即時偵測；採用輕量化 ONNX 學生模型（由教師模型蒸餾）。</li>
+                <li>使用 YuNet 作臉部偵測，並加入時間序列平滑（EMA／hysteresis／投票視窗）以穩定輸出。</li>
+                <li>UI overlay 即時顯示情緒標籤與信心度。</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>persona 感知對話</h3>
+                <p class="tags">離線規則 · Azure OpenAI（選用）· persona 切換</p>
+              </div>
+              <ul class="bullets">
+                <li>離線規則式代理作為預設（確保隨時可用），並提供 Azure OpenAI 後端（選用）。</li>
+                <li>支援 persona 切換（例如 Friendly／Professional／Playful）。</li>
+                <li>回應可同時參考情緒訊號與 persona 狀態，維持互動一致性。</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>語音輸出（TTS）</h3>
+                <p class="tags">Windows TTS · Azure Speech TTS（選用）· 自動回退</p>
+              </div>
+              <ul class="bullets">
+                <li>預設採用 Windows 內建 TTS，零設定、穩定可靠。</li>
+                <li>支援 Azure Speech TTS（選用）以獲得較佳語音品質。</li>
+                <li>線上服務失效時自動降級（fallback）至本機 TTS。</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>語音輸入（STT）— 選用</h3>
+                <p class="tags">Azure Speech STT · Push-to-talk · 免手持連續模式</p>
+              </div>
+              <ul class="bullets">
+                <li>Push-to-talk 模式：控制性高，便於穩定示範。</li>
+                <li>免手持連續收音模式：在 TTS 播放期間自動暫停收音，降低自我轉錄風險。</li>
+                <li>以自然語音互動為目標，並配合日誌記錄與延遲量測。</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>語調／聲音情緒（Prosody / Voice Mood）— 選用</h3>
+                <p class="tags">Mic capture · Pitch + energy · Mood mapping</p>
+              </div>
+              <ul class="bullets">
+                <li>即時收音 → pitch 與能量分析（demo-level）。</li>
+                <li>粗略映射至簡化標籤（例如 calm／excited／tense／sad）。</li>
+                <li>與 FER 結合，用於調整對話語氣與互動風格。</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>日誌與評估</h3>
+                <p class="tags">JSONL 會話日誌 · 延遲統計 · 可重現與除錯</p>
+              </div>
+              <ul class="bullets">
+                <li>以 JSONL 記錄每段互動（情緒、persona、STT/LLM/TTS 延遲等）。</li>
+                <li>提供延遲彙整腳本，便於快速檢視系統反應時間與穩定性。</li>
+                <li>設計目標為可重現、可觀測與易於除錯。</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="arch-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="arch-title">架構</h2>
+            <p class="muted">模組化流程：離線可運行；線上服務可選用並具回退策略。</p>
+          </div>
+
+          <div class="prose">
+            <pre><code>Webcam → FER → Dialogue Agent → TTS → UI Overlay
+
+Optional:
+Microphone → STT → Dialogue Agent
+Microphone → Prosody → Dialogue Agent</code></pre>
+            <p>所有元件均以可替換、可擴展為目標，便於後續研究延伸（例如 expressive TTS、voiceprint、multimodal fusion）。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="purpose-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="purpose-title">定位與價值</h2>
+          </div>
+
+          <ul class="bullets">
+            <li>核心重點在「系統整合」：把模型變成可用的即時互動系統。</li>
+            <li>展示即時 ML 工程、多模態 pipeline 設計、穩健的 fallback 邏輯與 Windows 部署。</li>
+            <li>透過日誌與延遲量測，強化可觀測性與可重現性，便於迭代與報告。</li>
+            <li>作為後續研究的基礎平台：更穩健的 FER、聲紋／語調建模、表現力更強的語音輸出、多模態融合等。</li>
+          </ul>
+
+          <details class="details">
+            <summary>開發紀錄（2026 年 1–2 月）— demo-first MVP 重點</summary>
+            <div class="prose">
+              <ul class="bullets">
+                <li>以可演示、可穩定運行為首要目標：FER → persona 對話 → TTS（選用 STT／prosody）。</li>
+                <li>離線優先：對話與 TTS 均有本機預設；雲端後端作可選升級。</li>
+                <li>STT 支援 push-to-talk 與連續模式；並在 TTS 播放期間暫停 STT，降低回音與誤轉錄。</li>
+                <li>以 JSONL 記錄互動與延遲，並提供彙整工具支援評估與撰寫報告。</li>
+              </ul>
+              <p class="muted">完整設定、腳本與更細節的技術說明將持續更新於 GitHub repo 文件。</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="repo-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="repo-title">Repository</h2>
+          </div>
+
+          <div class="callout">
+            <p style="margin: 0">
+              GitHub：<a href="https://github.com/domna735/Multimodal-Virtual-Communication-System" target="_blank" rel="noopener">Multimodal-Virtual-Communication-System</a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p class="muted">© <span id="year"></span> 馬啟崙（Donovan Ma）。以純 HTML/CSS 建置，部署於 GitHub Pages。</p>
+        <a class="muted-link" href="../index-zh.html#projects">返回項目列表</a>
+      </div>
+    </footer>
+
+    <script src="../script.js"></script>
+  </body>
+</html>

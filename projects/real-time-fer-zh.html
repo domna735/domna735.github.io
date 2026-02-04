@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="zh-HK">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>即時面部表情辨識系統 — 馬啟崙</title>
+    <meta
+      name="description"
+      content="一個可重現的即時 FER 系統：教師→學生蒸餾、校準（calibration）、以及面向部署的域轉移與穩定性（jitter）評估。"
+    />
+
+    <link rel="alternate" hreflang="en" href="real-time-fer.html" />
+    <link rel="alternate" hreflang="zh-HK" href="real-time-fer-zh.html" />
+
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" href="data:," />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">跳到內容</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../index-zh.html#top" aria-label="返回首頁">馬啟崙</a>
+          <span class="brand-sub">資訊保安 · 機器學習／電腦視覺 · 即時系統</span>
+        </div>
+
+        <nav class="nav" aria-label="主導覽">
+          <a class="nav-link" href="../index-zh.html#projects">項目</a>
+          <a class="nav-link" href="../index-zh.html#education">學歷</a>
+          <a class="nav-link" href="../index-zh.html#skills">技能</a>
+          <a class="nav-link" href="../index-zh.html#experience">經驗</a>
+          <a class="nav-link" href="../index-zh.html#contact">聯絡</a>
+          <a class="nav-link" href="real-time-fer.html" lang="en">EN</a>
+          <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="切換主題">主題</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">重點項目</p>
+          <h1 class="hero-title">即時面部表情辨識系統（Real-time FER）</h1>
+          <p class="hero-lede">以可追溯的實驗產物（artifacts）為核心：教師→學生蒸餾、校準與面向部署的穩定性評估。</p>
+
+          <div class="hero-cta">
+            <a class="btn" href="https://github.com/domna735/Real-time-Facial-Expression-Recognition-System" target="_blank" rel="noopener">GitHub 專案</a>
+            <a class="btn btn-ghost" href="https://github.com/domna735/real-time-FER-demo" target="_blank" rel="noopener">Demo</a>
+            <a class="btn btn-ghost" href="../index-zh.html#projects">返回項目</a>
+          </div>
+
+          <div class="callout">
+            <strong>重點：</strong>除離線 macro-F1 外，亦以「即時部署可用性」為目標：穩定度（flicker/jitter）、延遲／FPS、校準（confidence 可解釋性）
+            以及由資料集轉到 webcam 的域轉移（domain shift）。
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="overview-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="overview-title">概覽</h2>
+            <p class="muted">報告期：2025 年 8 月 – 2026 年 1 月 · 文件日期：2026-01-28</p>
+          </div>
+
+          <div class="prose">
+            <p>
+              本項目重建一個端到端、可重現（reproducible）的 FER 管線：每次訓練與評估均輸出已驗證的 manifests、checkpoints 與 metrics JSON，確保所有數據結論均可追溯。
+              系統使用 7 類表情（Angry/Disgust/Fear/Happy/Sad/Surprise/Neutral），並同時評估離線分類品質及面向部署的實時行為。
+            </p>
+            <ul class="bullets">
+              <li><strong>資料完整性：</strong>多來源 manifest 共 466,284 筆，驗證為 0 missing paths、0 bad labels。</li>
+              <li><strong>教師模型：</strong>RN18 / EfficientNet-B3 / ConvNeXt-Tiny 以 ArcFace-style protocol 訓練；macro-F1 約 0.781–0.791。</li>
+              <li><strong>學生模型：</strong>MobileNetV3-Large 以 CE → KD → DKD 訓練；KD/DKD 對 temperature-scaled 校準有顯著改善，但在主要 HQ-train 評估中未超越 CE 的 macro-F1。</li>
+              <li><strong>部署導向：</strong>建立可重現的 webcam 評分協定（raw vs smoothed + jitter flips/min），並加入離線安全閘（safety gate）以避免不安全的 adaptation。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="pipeline-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="pipeline-title">系統流程</h2>
+            <p class="muted">由資料清理到即時 overlay 與 logging。</p>
+          </div>
+
+          <div class="prose">
+            <pre><code>離線訓練：
+Manifest 清理 → Manifest 驗證 → 教師訓練 → Ensemble 選擇 → Softlabels 匯出 → 學生 CE/KD/DKD
+
+即時 Demo：
+Webcam/影片 → 人臉偵測（YuNet）→ 前處理（可選 CLAHE）→ 學生推論（ONNX）→ 平滑/抑制抖動 → 視覺化 + logs</code></pre>
+            <p>
+              穩定化（stabilisation）被視為部署需求之一：Demo 會同時報告 <strong>raw</strong> 與 <strong>smoothed</strong> 的行為，
+              分別對應「瞬時分類品質」與「使用者體感」。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="results-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="results-title">結果摘要（可追溯 artifacts）</h2>
+            <p class="muted">數值均取自既有 run artifacts；校準同時報告 raw 與 temperature-scaled 指標。</p>
+          </div>
+
+          <div class="prose">
+            <h3>教師模型（Stage A, img224）</h3>
+            <div class="table-wrap" role="region" aria-label="教師模型指標表" tabindex="0">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>模型</th>
+                    <th style="text-align: right">Accuracy</th>
+                    <th style="text-align: right">Macro-F1</th>
+                    <th style="text-align: right">Raw ECE</th>
+                    <th style="text-align: right">TS ECE</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>RN18</td>
+                    <td style="text-align: right">0.7862</td>
+                    <td style="text-align: right">0.7808</td>
+                    <td style="text-align: right">0.2053</td>
+                    <td style="text-align: right">0.1489</td>
+                  </tr>
+                  <tr>
+                    <td>EfficientNet-B3</td>
+                    <td style="text-align: right">0.7961</td>
+                    <td style="text-align: right">0.7910</td>
+                    <td style="text-align: right">0.1988</td>
+                    <td style="text-align: right">0.0839</td>
+                  </tr>
+                  <tr>
+                    <td>ConvNeXt-Tiny</td>
+                    <td style="text-align: right">0.7941</td>
+                    <td style="text-align: right">0.7890</td>
+                    <td style="text-align: right">0.2009</td>
+                    <td style="text-align: right">0.0817</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>學生模型（HQ-train 評估）</h3>
+            <div class="table-wrap" role="region" aria-label="學生模型指標表" tabindex="0">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>階段</th>
+                    <th style="text-align: right">Accuracy</th>
+                    <th style="text-align: right">Macro-F1</th>
+                    <th style="text-align: right">Raw ECE</th>
+                    <th style="text-align: right">TS ECE</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>CE</td>
+                    <td style="text-align: right">0.7502</td>
+                    <td style="text-align: right">0.7420</td>
+                    <td style="text-align: right">0.1310</td>
+                    <td style="text-align: right">0.0499</td>
+                  </tr>
+                  <tr>
+                    <td>KD</td>
+                    <td style="text-align: right">0.7347</td>
+                    <td style="text-align: right">0.7334</td>
+                    <td style="text-align: right">0.2153</td>
+                    <td style="text-align: right">0.0278</td>
+                  </tr>
+                  <tr>
+                    <td>DKD</td>
+                    <td style="text-align: right">0.7374</td>
+                    <td style="text-align: right">0.7375</td>
+                    <td style="text-align: right">0.2095</td>
+                    <td style="text-align: right">0.0266</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="muted">解讀：在此設定下，CE 的 raw macro-F1 最佳；KD/DKD 的 temperature-scaled 校準（TS ECE）則顯著更佳。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="domain-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="domain-title">部署導向：域轉移與穩定性</h2>
+            <p class="muted">面向真實環境：平滑、抖動、以及安全的 adaptation。</p>
+          </div>
+
+          <ul class="bullets">
+            <li>Webcam 評分協定：記錄 <strong>raw vs smoothed</strong> 指標與 <strong>jitter flips/min</strong>（抖動翻轉率）。</li>
+            <li>保守 adaptation：必須通過 <strong>離線 safety gate</strong>（eval-only manifest）才會被視為可用 checkpoint。</li>
+            <li>NL/NegL 篩選：探索校準與穩健性，但由於容易回退（regression），必須以 gating 與對照比較嚴格管控。</li>
+          </ul>
+
+          <details class="details">
+            <summary>開發要點與教訓</summary>
+            <div class="prose">
+              <ul class="bullets">
+                <li>以 artifacts 為準繩（manifest／metrics JSON／compare tables）可避免數據漂移與記憶偏差。</li>
+                <li>穩定性指標（flicker/jitter）必須明確報告，不能由離線 macro-F1 推斷。</li>
+                <li>域轉移 adaptation 需要安全欄（safety rails）；小 buffer 的更新可能傷害整體泛化能力。</li>
+                <li>NL/NegL 屬敏感正則化：需要更嚴格的預設關閉與回退機制。</li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="repo-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="repo-title">專案連結</h2>
+          </div>
+
+          <div class="callout">
+            <p style="margin: 0">
+              GitHub：<a href="https://github.com/domna735/Real-time-Facial-Expression-Recognition-System" target="_blank" rel="noopener">Real-time-Facial-Expression-Recognition-System</a>
+              <span class="dot" aria-hidden="true">•</span>
+              <a href="https://github.com/domna735/real-time-FER-demo" target="_blank" rel="noopener">Demo repo</a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p class="muted">© <span id="year"></span> 馬啟崙。以純 HTML/CSS 建構並部署於 GitHub Pages。</p>
+        <a class="muted-link" href="../index-zh.html#projects">返回項目</a>
+      </div>
+    </footer>
+
+    <script src="../script.js"></script>
+  </body>
+</html>

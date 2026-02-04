@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>Multimodal Virtual Communication System (MVP) — Donovan Ma</title>
+    <meta
+      name="description"
+      content="A demo-first, real-time multimodal AI interaction prototype integrating FER, persona-aware dialogue, TTS, optional STT, optional prosody analysis, UI overlay, and session logging."
+    />
+
+    <link rel="alternate" hreflang="en" href="multimodal-virtual-communication-system.html" />
+    <link rel="alternate" hreflang="zh-HK" href="multimodal-virtual-communication-system-zh.html" />
+
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" href="data:," />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../index.html#top" aria-label="Go to home">Donovan Ma</a>
+          <span class="brand-sub">Information Security · ML/CV · Real-time Systems</span>
+        </div>
+
+        <nav class="nav" aria-label="Primary">
+          <a class="nav-link" href="../index.html#projects">Projects</a>
+          <a class="nav-link" href="../index.html#education">Education</a>
+          <a class="nav-link" href="../index.html#skills">Skills</a>
+          <a class="nav-link" href="../index.html#experience">Experience</a>
+          <a class="nav-link" href="../index.html#contact">Contact</a>
+          <a class="nav-link" href="multimodal-virtual-communication-system-zh.html" lang="zh-HK">中文</a>
+          <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="Toggle theme">Theme</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">Key project</p>
+          <h1 class="hero-title">Multimodal Virtual Communication System (MVP)</h1>
+          <p class="hero-lede">A demo-first, real-time multimodal AI interaction prototype.</p>
+
+          <div class="hero-cta">
+            <a class="btn" href="https://github.com/domna735/Multimodal-Virtual-Communication-System" target="_blank" rel="noopener">GitHub repo</a>
+            <a class="btn btn-ghost" href="../index.html#projects">Back to projects</a>
+          </div>
+
+          <div class="callout">
+            <strong>Goal:</strong> build a working system (not just a model) — a prototype that can see, listen, speak, and respond with consistent persona behaviour in real time.
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="overview-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="overview-title">Overview</h2>
+            <p class="muted">Offline-first, modular, and Windows-friendly (with a DirectML path).</p>
+          </div>
+
+          <div class="prose">
+            <p>
+              This MVP is a demo-first implementation of a real-time multimodal communication system that integrates:
+            </p>
+            <ul class="bullets">
+              <li>Facial Expression Recognition (FER)</li>
+              <li>Persona-aware dialogue generation</li>
+              <li>Text-to-Speech (TTS)</li>
+              <li>Optional Speech-to-Text (STT)</li>
+              <li>Optional prosody / voice mood analysis</li>
+              <li>Real-time UI overlay + session logging</li>
+            </ul>
+            <p>
+              The system is designed for reliability and demonstrability: it runs with offline defaults, and can optionally
+              upgrade to cloud backends when available.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="features-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="features-title">Features</h2>
+          </div>
+
+          <div class="cards">
+            <article class="card">
+              <div class="card-head">
+                <h3>Real-time Facial Expression Recognition</h3>
+                <p class="tags">Webcam · Distilled ONNX student · YuNet · EMA / hysteresis / voting</p>
+              </div>
+              <ul class="bullets">
+                <li>Webcam-based FER using a lightweight ONNX student model distilled from a teacher ensemble.</li>
+                <li>YuNet face detection plus temporal smoothing to stabilise outputs.</li>
+                <li>Live overlay showing emotion label and confidence.</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>Persona-aware Dialogue</h3>
+                <p class="tags">Offline rules · Azure OpenAI (optional) · Persona switching</p>
+              </div>
+              <ul class="bullets">
+                <li>Offline rule-based agent (always available), with optional Azure OpenAI backend for higher-quality responses.</li>
+                <li>Persona switching (e.g., Friendly / Professional / Playful).</li>
+                <li>Responses adapt to emotion + persona signals.</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>Speech Output (TTS)</h3>
+                <p class="tags">Windows TTS · Azure Speech TTS (optional) · Fallback handling</p>
+              </div>
+              <ul class="bullets">
+                <li>Windows built-in TTS as the default for zero-setup reliability.</li>
+                <li>Optional Azure Speech TTS for higher-quality voices.</li>
+                <li>Automatic fallback if online services fail.</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>Speech Input (STT) — Optional</h3>
+                <p class="tags">Azure Speech STT · Push-to-talk · Continuous hands-free</p>
+              </div>
+              <ul class="bullets">
+                <li>Push-to-talk mode for reliable, controlled demos.</li>
+                <li>Hands-free continuous mode with auto-pause during TTS playback.</li>
+                <li>Designed to support natural voice conversation.</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>Prosody / Voice Mood — Optional</h3>
+                <p class="tags">Mic capture · Pitch + energy · Mood mapping</p>
+              </div>
+              <ul class="bullets">
+                <li>Live microphone capture → pitch and energy analysis.</li>
+                <li>Simple mapping to coarse labels (e.g., calm / excited / tense / sad).</li>
+                <li>Combined with FER to influence dialogue tone.</li>
+              </ul>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>Logging & Evaluation</h3>
+                <p class="tags">JSONL session logs · Latency summariser · Reproducibility</p>
+              </div>
+              <ul class="bullets">
+                <li>JSONL session logs (emotion, persona, STT/LLM/TTS latency).</li>
+                <li>Latency summariser script for quick evaluation and reporting.</li>
+                <li>Designed for debugging and reproducible demos.</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="arch-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="arch-title">Architecture</h2>
+            <p class="muted">A modular pipeline with offline defaults and optional upgrades.</p>
+          </div>
+
+          <div class="prose">
+            <pre><code>Webcam → FER → Dialogue Agent → TTS → UI Overlay
+
+Optional:
+Microphone → STT → Dialogue Agent
+Microphone → Prosody → Dialogue Agent</code></pre>
+            <p>
+              All components are designed to be replaceable for future research (e.g., expressive TTS, voiceprint modeling,
+              multimodal fusion).
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="purpose-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="purpose-title">Why this project matters</h2>
+          </div>
+
+          <ul class="bullets">
+            <li>Demonstrates system integration and real-world engineering trade-offs (not a single isolated model).</li>
+            <li>Focuses on real-time ML engineering, multimodal pipeline design, and robust fallback logic.</li>
+            <li>Built for Windows deployment, observability (logs), and reproducibility.</li>
+            <li>Serves as a foundation for future work in expressive speech, voiceprint/prosody modeling, and multimodal fusion.</li>
+          </ul>
+
+          <details class="details">
+            <summary>Process report (Jan–Feb 2026) — demo-first MVP notes</summary>
+            <div class="prose">
+              <p>
+                During this period, the priority was a stable, demonstrable end-to-end prototype:
+                <strong>webcam FER → persona-aware dialogue → speech output</strong>, with optional voice input and prosody.
+              </p>
+              <ul class="bullets">
+                <li>Offline-first dialogue baseline; optional Azure/OpenAI backends behind the same interface.</li>
+                <li>Windows TTS baseline with optional Azure Speech TTS and fallback handling.</li>
+                <li>Azure Speech STT in push-to-talk and continuous modes; pause STT while TTS is speaking to reduce echo.</li>
+                <li>Prosody demo features (pitch/energy → voice mood) and a simple fusion heuristic.</li>
+                <li>JSONL session logs + latency summarisation utilities for evaluation and reporting.</li>
+              </ul>
+              <p class="muted">Full technical details, setup notes, and scripts are maintained in the repository documentation.</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="repo-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="repo-title">Repository</h2>
+          </div>
+
+          <div class="callout">
+            <p style="margin: 0">
+              GitHub: <a href="https://github.com/domna735/Multimodal-Virtual-Communication-System" target="_blank" rel="noopener">Multimodal-Virtual-Communication-System</a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p class="muted">© <span id="year"></span> Donovan Ma. Built with plain HTML/CSS for GitHub Pages.</p>
+        <a class="muted-link" href="../index.html#projects">Back to projects</a>
+      </div>
+    </footer>
+
+    <script src="../script.js"></script>
+  </body>
+</html>
