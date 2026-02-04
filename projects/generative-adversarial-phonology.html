@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>Generative Adversarial Phonology (ciwGAN) — Donovan Ma</title>
+    <meta
+      name="description"
+      content="Conditional WGAN-GP (ciwGAN) for Vietnamese vowel length contrasts using fixed-size log-mel spectrogram synthesis and objective phonetic evaluation (VOT, intensity)."
+    />
+
+    <link rel="alternate" hreflang="en" href="generative-adversarial-phonology.html" />
+    <link rel="alternate" hreflang="zh-HK" href="generative-adversarial-phonology-zh.html" />
+
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" href="data:," />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../index.html#top" aria-label="Go to home">Donovan Ma</a>
+          <span class="brand-sub">Information Security · ML/CV · Real-time Systems</span>
+        </div>
+
+        <nav class="nav" aria-label="Primary">
+          <a class="nav-link" href="../index.html#projects">Projects</a>
+          <a class="nav-link" href="../index.html#education">Education</a>
+          <a class="nav-link" href="../index.html#skills">Skills</a>
+          <a class="nav-link" href="../index.html#experience">Experience</a>
+          <a class="nav-link" href="../index.html#contact">Contact</a>
+          <a class="nav-link" href="generative-adversarial-phonology-zh.html" lang="zh-HK">中文</a>
+          <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="Toggle theme">Theme</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">Key project</p>
+          <h1 class="hero-title">Generative Adversarial Phonology — ciwGAN for Vietnamese vowel length</h1>
+          <p class="hero-lede">
+            A conditional WGAN-GP pipeline that generates Vietnamese vowel audio conditioned on duration class (short vs long),
+            evaluated with objective phonetic metrics (VOT, intensity) rather than listening tests alone.
+          </p>
+
+          <div class="hero-cta">
+            <a
+              class="btn"
+              href="https://github.com/domna735/Vowel_length_contrasts_in_deep_learning_Generative_Adversarial_Phonology_and_duration"
+              target="_blank"
+              rel="noopener"
+            >
+              GitHub repo
+            </a>
+            <a class="btn btn-ghost" href="../index.html#projects">Back to projects</a>
+          </div>
+
+          <div class="callout">
+            <strong>Research question:</strong> can a conditional GAN learn controllable vowel length while preserving sub-20ms timing cues
+            (especially VOT) without explicit supervision on those cues?
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="overview-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="overview-title">Overview</h2>
+            <p class="muted">Last updated: 2026-02-04</p>
+          </div>
+
+          <div class="prose">
+            <p>
+              This project implements an end-to-end, reproducible research pipeline for training a conditional generative model on Vietnamese
+              vowel recordings. The model generates fixed-size log-mel spectrogram patches (128 mel bins × 128 time steps), then reconstructs
+              audio using Griffin–Lim style mel inversion. Evaluation focuses on linguistically meaningful properties:
+              <strong>Voice Onset Time (VOT)</strong> and <strong>intensity (RMS dB)</strong>.
+            </p>
+
+            <ul class="bullets">
+              <li><strong>Model:</strong> conditional WGAN-GP (critic + auxiliary duration-class head).</li>
+              <li><strong>Condition:</strong> duration class $c \in \{0,1\}$ (short/long), injected via one-hot concatenation with latent $z$.</li>
+              <li><strong>Representation:</strong> fixed-size log-mel patches, normalised to $[-1,1]$.</li>
+              <li><strong>Metrics:</strong> VOT (burst → voicing delay), intensity summary statistics (mean/median/max dB, peak-to-mean).</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="method-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="method-title">Method (implementation summary)</h2>
+            <p class="muted">Spectrogram-based conditional generation with objective evaluation and packaging.</p>
+          </div>
+
+          <div class="prose">
+            <h3>Data → features</h3>
+            <ul class="bullets">
+              <li>Resample to 16 kHz; compute mel spectrogram (n_mels=128, n_fft=1024, hop_length=256).</li>
+              <li>Power → dB; map dB range [-80, 0] to [-1, 1].</li>
+              <li>Fix time dimension to 128 frames (pad with -1 or random-crop).</li>
+            </ul>
+
+            <h3>Model and losses</h3>
+            <ul class="bullets">
+              <li>Generator: dense projection → upsampling conv blocks → tanh output.</li>
+              <li>Critic: conv downsampling; two heads: critic score + 2-way duration classifier.</li>
+              <li>Objective: WGAN-GP critic loss + gradient penalty (λ=10) + auxiliary classification loss (real and fake).</li>
+              <li>Schedule: critic_steps=5 per generator step; Adam lr=2e-4, β1=0.5, β2=0.9.</li>
+            </ul>
+
+            <h3>Waveform reconstruction</h3>
+            <p>
+              Generated log-mel is inverted to waveform via mel_to_audio (Griffin–Lim style). This keeps the workflow fully local and
+              reproducible but is a known bottleneck for amplitude/phase realism.
+            </p>
+
+            <h3>Reproducible packaging</h3>
+            <ul class="bullets">
+              <li>Scripts compute metrics, generate plots, and build a deliverables folder suitable for a writing sample.</li>
+              <li>Runs are organised under <code>runs/</code> (checkpoints, TensorBoard logs, generated audio, metric CSVs, comparisons).</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="results-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="results-title">Results snapshot</h2>
+            <p class="muted">Key table copied from the project’s deliverables summary (pilot → baseline → final).</p>
+          </div>
+
+          <div class="prose">
+            <div class="table-wrap" role="region" aria-label="Overall results summary" tabindex="0">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Stage</th>
+                    <th>Class</th>
+                    <th style="text-align: right">Samples</th>
+                    <th style="text-align: right">Real VOT median (ms)</th>
+                    <th style="text-align: right">Gen VOT median (ms)</th>
+                    <th style="text-align: right">VOT median error</th>
+                    <th style="text-align: right">Real mean dB</th>
+                    <th style="text-align: right">Gen mean dB (raw)</th>
+                    <th style="text-align: right">Gen mean dB (norm)</th>
+                    <th style="text-align: right">Norm dB error</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1 epoch (pilot)</td>
+                    <td>Long</td>
+                    <td style="text-align: right">16</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">287.5</td>
+                    <td style="text-align: right">280.0</td>
+                    <td style="text-align: right">-37.7</td>
+                    <td style="text-align: right">-51.0</td>
+                    <td style="text-align: right">—</td>
+                    <td style="text-align: right">—</td>
+                  </tr>
+                  <tr>
+                    <td>1 epoch (pilot)</td>
+                    <td>Short</td>
+                    <td style="text-align: right">16</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">230.0</td>
+                    <td style="text-align: right">222.5</td>
+                    <td style="text-align: right">-37.7</td>
+                    <td style="text-align: right">-51.0</td>
+                    <td style="text-align: right">—</td>
+                    <td style="text-align: right">—</td>
+                  </tr>
+                  <tr>
+                    <td>30 epochs</td>
+                    <td>Long</td>
+                    <td style="text-align: right">32</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">5.0</td>
+                    <td style="text-align: right">2.5</td>
+                    <td style="text-align: right">-37.7</td>
+                    <td style="text-align: right">-79.47</td>
+                    <td style="text-align: right">-53.2</td>
+                    <td style="text-align: right">15.5</td>
+                  </tr>
+                  <tr>
+                    <td>30 epochs</td>
+                    <td>Short</td>
+                    <td style="text-align: right">32</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">11.25</td>
+                    <td style="text-align: right">3.75</td>
+                    <td style="text-align: right">-37.7</td>
+                    <td style="text-align: right">-80.98</td>
+                    <td style="text-align: right">-55.12</td>
+                    <td style="text-align: right">17.42</td>
+                  </tr>
+                  <tr>
+                    <td>100 epochs</td>
+                    <td>Long</td>
+                    <td style="text-align: right">250</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">0.0</td>
+                    <td style="text-align: right">-37.7</td>
+                    <td style="text-align: right">-79.37</td>
+                    <td style="text-align: right">-53.08</td>
+                    <td style="text-align: right">15.38</td>
+                  </tr>
+                  <tr>
+                    <td>100 epochs</td>
+                    <td>Short</td>
+                    <td style="text-align: right">250</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">15.0</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">-37.7</td>
+                    <td style="text-align: right">-81.24</td>
+                    <td style="text-align: right">-55.96</td>
+                    <td style="text-align: right">18.26</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Interpretation (evidence-limited to the stored artifacts)</h3>
+            <ul class="bullets">
+              <li>VOT: long-vowel median improves monotonically and matches the stored reference median at 100 epochs (0 ms median error).</li>
+              <li>VOT: short-vowel median improves vs pilot but remains shifted (+7.5 ms median error at 100 epochs).</li>
+              <li>Intensity: Griffin–Lim inversion strongly affects amplitude; normalisation reduces mismatch but a 15–18 dB offset persists.</li>
+            </ul>
+
+            <details class="details">
+              <summary>Important caveat: real VOT reference coverage</summary>
+              <div class="prose">
+                <p>
+                  The stored real-reference VOT CSV currently includes very limited entries (in some comparisons, <code>real_n = 1</code>), so
+                  real-vs-generated distribution overlap cannot be quantified reliably from the repository alone.
+                  Regenerating the real-reference VOT CSV from the full dataset is the recommended next step.
+                </p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="repro-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="repro-title">Reproducible workflow (high level)</h2>
+            <p class="muted">Representative commands (dataset path supplied locally).</p>
+          </div>
+
+          <div class="prose">
+            <pre><code># Train (example)
+python tools/train_ciwgan.py --data-root &lt;PATH_TO_AUDIO_ROOT&gt; --epochs 30 --batch-size 8
+
+# Generate 250 samples per class
+python tools/generate_ciwgan.py --ckpt runs/checkpoints/.../ckpt-100 --out runs/gen/ciwgan_eval_long  --n 250 --class-id 1
+python tools/generate_ciwgan.py --ckpt runs/checkpoints/.../ckpt-100 --out runs/gen/ciwgan_eval_short --n 250 --class-id 0
+
+# Metrics
+python tools/compute_vot.py --dir runs/gen/ciwgan_eval_long  --out runs/vot_100ep_long_250.csv
+python tools/compute_vot.py --dir runs/gen/ciwgan_eval_short --out runs/vot_100ep_short_250.csv</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="next-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="next-title">Limitations and next steps</h2>
+          </div>
+
+          <ul class="bullets">
+            <li><strong>Real VOT reference:</strong> recompute <code>runs/vot_real.csv</code> from the full real dataset and re-run comparisons/plots.</li>
+            <li><strong>Data imbalance:</strong> address potential long:short imbalance via sampling or weighting; re-check short-vowel VOT shift.</li>
+            <li><strong>Latent probing:</strong> complete latent interpolation + metric evaluation to test whether duration cues live in class conditioning vs latent space.</li>
+            <li><strong>Vocoder:</strong> replace Griffin–Lim inversion with a neural vocoder (e.g., HiFi-GAN) to improve amplitude/phase realism.</li>
+            <li><strong>Metric robustness:</strong> validate VOT heuristics on synthetic audio with sanity checks and manual spot-verification.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="repo-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="repo-title">Repository</h2>
+          </div>
+
+          <div class="callout">
+            <p style="margin: 0">
+              GitHub:
+              <a
+                href="https://github.com/domna735/Vowel_length_contrasts_in_deep_learning_Generative_Adversarial_Phonology_and_duration"
+                target="_blank"
+                rel="noopener"
+              >
+                Vowel_length_contrasts_in_deep_learning_Generative_Adversarial_Phonology_and_duration
+              </a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p class="muted">© <span id="year"></span> Donovan Ma. Built with plain HTML/CSS for GitHub Pages.</p>
+        <a class="muted-link" href="../index.html#projects">Back to projects</a>
+      </div>
+    </footer>
+
+    <script src="../script.js"></script>
+  </body>
+</html>

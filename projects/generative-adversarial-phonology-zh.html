@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="zh-HK">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>生成對抗音系建模（ciwGAN）— 馬啟崙</title>
+    <meta
+      name="description"
+      content="以 conditional WGAN-GP（ciwGAN）生成越南語元音音訊，並以 VOT 與強度等客觀語音指標評估短／長元音長度對立。"
+    />
+
+    <link rel="alternate" hreflang="en" href="generative-adversarial-phonology.html" />
+    <link rel="alternate" hreflang="zh-HK" href="generative-adversarial-phonology-zh.html" />
+
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" href="data:," />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">跳到內容</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../index-zh.html#top" aria-label="返回首頁">馬啟崙</a>
+          <span class="brand-sub">資訊保安 · 機器學習／電腦視覺 · 即時系統</span>
+        </div>
+
+        <nav class="nav" aria-label="主導覽">
+          <a class="nav-link" href="../index-zh.html#projects">項目</a>
+          <a class="nav-link" href="../index-zh.html#education">學歷</a>
+          <a class="nav-link" href="../index-zh.html#skills">技能</a>
+          <a class="nav-link" href="../index-zh.html#experience">經驗</a>
+          <a class="nav-link" href="../index-zh.html#contact">聯絡</a>
+          <a class="nav-link" href="generative-adversarial-phonology.html" lang="en">EN</a>
+          <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="切換主題">主題</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">重點項目</p>
+          <h1 class="hero-title">生成對抗音系建模 — ciwGAN：越南語元音長度對立</h1>
+          <p class="hero-lede">
+            以 conditional WGAN-GP 在固定尺寸 log-mel spectrogram（128×128）上生成越南語元音音訊，並以客觀語音指標
+            （VOT、強度）評估短／長元音的可控性與語音逼真度。
+          </p>
+
+          <div class="hero-cta">
+            <a
+              class="btn"
+              href="https://github.com/domna735/Vowel_length_contrasts_in_deep_learning_Generative_Adversarial_Phonology_and_duration"
+              target="_blank"
+              rel="noopener"
+            >
+              GitHub 專案
+            </a>
+            <a class="btn btn-ghost" href="../index-zh.html#projects">返回項目</a>
+          </div>
+
+          <div class="callout">
+            <strong>研究問題：</strong>在沒有明確標註時間線索（如 burst 與 voicing onset）的前提下，conditional GAN 是否能同時做到：
+            （1）短／長元音可控；（2）維持具語音學意義的微秒級時間結構（尤其是 VOT）。
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="overview-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="overview-title">概覽</h2>
+            <p class="muted">最後更新：2026-02-04</p>
+          </div>
+
+          <div class="prose">
+            <p>
+              本項目提供一個可重現的研究型工作流程：訓練 conditional WGAN-GP（ciwGAN）以生成越南語元音之 log-mel spectrogram patch，
+              再以 Griffin–Lim 風格的 mel inversion 還原音訊。評估重點不是僅靠主觀聆聽，而是使用可量化、具語音學意義的客觀指標：
+              <strong>VOT（Voice Onset Time）</strong> 與 <strong>強度（RMS dB）</strong>。
+            </p>
+
+            <ul class="bullets">
+              <li><strong>模型：</strong>conditional WGAN-GP（critic + duration class head）。</li>
+              <li><strong>條件：</strong>短／長元音類別 $c \in \{0,1\}$，以 one-hot 與 latent $z$ 串接。</li>
+              <li><strong>表示：</strong>固定尺寸 log-mel patch，正規化至 $[-1,1]$。</li>
+              <li><strong>評估：</strong>VOT（burst→voicing 延遲）、強度統計（mean/median/max dB、peak-to-mean）。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="method-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="method-title">方法（實作摘要）</h2>
+            <p class="muted">以固定尺寸 spectrogram 建模，並建立評估與打包流程。</p>
+          </div>
+
+          <div class="prose">
+            <h3>資料與特徵</h3>
+            <ul class="bullets">
+              <li>重採樣至 16 kHz；mel spectrogram（n_mels=128, n_fft=1024, hop_length=256）。</li>
+              <li>Power→dB；將 [-80,0] 映射至 [-1,1]。</li>
+              <li>時間維固定為 128 frames（不足補 -1；過長隨機裁切）。</li>
+            </ul>
+
+            <h3>模型與損失</h3>
+            <ul class="bullets">
+              <li>Generator：dense 投影 → upsample conv blocks → tanh 輸出。</li>
+              <li>Critic：conv downsample；兩個 head：critic score + 2 類 duration classifier。</li>
+              <li>目標：WGAN-GP + gradient penalty（λ=10）+ 輔助分類損失（real 與 fake）。</li>
+              <li>訓練：critic_steps=5；Adam lr=2e-4, β1=0.5, β2=0.9。</li>
+            </ul>
+
+            <h3>音訊重建（inversion）</h3>
+            <p>
+              以 mel_to_audio（Griffin–Lim 風格）將 spectrogram 還原為 waveform。其優點是本機可重現且依賴少，但對幅度與相位逼真度
+              有明顯限制，亦直接反映於強度指標的偏移。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="results-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="results-title">結果摘要</h2>
+            <p class="muted">下表取自 deliverables summary（pilot → baseline → final）。</p>
+          </div>
+
+          <div class="prose">
+            <div class="table-wrap" role="region" aria-label="整體結果摘要表" tabindex="0">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>階段</th>
+                    <th>類別</th>
+                    <th style="text-align: right">樣本數</th>
+                    <th style="text-align: right">Real VOT 中位數</th>
+                    <th style="text-align: right">Gen VOT 中位數</th>
+                    <th style="text-align: right">中位數誤差</th>
+                    <th style="text-align: right">Real mean dB</th>
+                    <th style="text-align: right">Gen mean dB（raw）</th>
+                    <th style="text-align: right">Gen mean dB（norm）</th>
+                    <th style="text-align: right">norm dB 誤差</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1 epoch（pilot）</td>
+                    <td>Long</td>
+                    <td style="text-align: right">16</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">287.5</td>
+                    <td style="text-align: right">280.0</td>
+                    <td style="text-align: right">-37.7</td>
+                    <td style="text-align: right">-51.0</td>
+                    <td style="text-align: right">—</td>
+                    <td style="text-align: right">—</td>
+                  </tr>
+                  <tr>
+                    <td>1 epoch（pilot）</td>
+                    <td>Short</td>
+                    <td style="text-align: right">16</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">230.0</td>
+                    <td style="text-align: right">222.5</td>
+                    <td style="text-align: right">-37.7</td>
+                    <td style="text-align: right">-51.0</td>
+                    <td style="text-align: right">—</td>
+                    <td style="text-align: right">—</td>
+                  </tr>
+                  <tr>
+                    <td>30 epochs</td>
+                    <td>Long</td>
+                    <td style="text-align: right">32</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">5.0</td>
+                    <td style="text-align: right">2.5</td>
+                    <td style="text-align: right">-37.7</td>
+                    <td style="text-align: right">-79.47</td>
+                    <td style="text-align: right">-53.2</td>
+                    <td style="text-align: right">15.5</td>
+                  </tr>
+                  <tr>
+                    <td>30 epochs</td>
+                    <td>Short</td>
+                    <td style="text-align: right">32</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">11.25</td>
+                    <td style="text-align: right">3.75</td>
+                    <td style="text-align: right">-37.7</td>
+                    <td style="text-align: right">-80.98</td>
+                    <td style="text-align: right">-55.12</td>
+                    <td style="text-align: right">17.42</td>
+                  </tr>
+                  <tr>
+                    <td>100 epochs</td>
+                    <td>Long</td>
+                    <td style="text-align: right">250</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">0.0</td>
+                    <td style="text-align: right">-37.7</td>
+                    <td style="text-align: right">-79.37</td>
+                    <td style="text-align: right">-53.08</td>
+                    <td style="text-align: right">15.38</td>
+                  </tr>
+                  <tr>
+                    <td>100 epochs</td>
+                    <td>Short</td>
+                    <td style="text-align: right">250</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">15.0</td>
+                    <td style="text-align: right">7.5</td>
+                    <td style="text-align: right">-37.7</td>
+                    <td style="text-align: right">-81.24</td>
+                    <td style="text-align: right">-55.96</td>
+                    <td style="text-align: right">18.26</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>解讀（以現有 artifacts 為準）</h3>
+            <ul class="bullets">
+              <li>Long-vowel VOT 中位數隨訓練提升，並在 100 epochs 與已存 real reference 中位數完全一致（0 ms 誤差）。</li>
+              <li>Short-vowel VOT 由 pilot 大幅改善，但在 100 epochs 仍有 +7.5 ms 的中位數偏移。</li>
+              <li>強度受 Griffin–Lim inversion 影響顯著；normalisation 後仍保留約 15–18 dB 的差距。</li>
+            </ul>
+
+            <details class="details">
+              <summary>重要限制：real VOT reference 覆蓋不足</summary>
+              <div class="prose">
+                <p>
+                  目前 repository 內的 real VOT CSV 在部分比較中顯示 <code>real_n = 1</code>，因此無法可靠估計 real distribution 的 mean/std。
+                  建議在具備完整真實音訊資料的環境中重新生成 real VOT 參考，並重跑比較與繪圖。
+                </p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="next-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="next-title">限制與後續工作</h2>
+          </div>
+
+          <ul class="bullets">
+            <li><strong>補齊 real VOT reference：</strong>以完整真實資料重建 <code>runs/vot_real.csv</code>，再重跑 compare 與 plots。</li>
+            <li><strong>處理資料不平衡：</strong>若 long:short 比例失衡，採用 sampling/weighting 重新訓練以觀察 short-vowel VOT 是否改善。</li>
+            <li><strong>latent probing：</strong>完成 latent interpolation + 指標計算，檢驗長度線索主要由 class conditioning 或 latent space 控制。</li>
+            <li><strong>引入 vocoder：</strong>以 HiFi-GAN 等 neural vocoder 取代 Griffin–Lim，改善幅度與相位逼真度。</li>
+            <li><strong>量測穩健性：</strong>針對 VOT heuristic 在 synthetic 音訊上的敏感度做 sanity checks 與人工抽查。</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="repo-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="repo-title">專案連結</h2>
+          </div>
+
+          <div class="callout">
+            <p style="margin: 0">
+              GitHub：
+              <a
+                href="https://github.com/domna735/Vowel_length_contrasts_in_deep_learning_Generative_Adversarial_Phonology_and_duration"
+                target="_blank"
+                rel="noopener"
+              >
+                Vowel_length_contrasts_in_deep_learning_Generative_Adversarial_Phonology_and_duration
+              </a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p class="muted">© <span id="year"></span> 馬啟崙。以純 HTML/CSS 建構並部署於 GitHub Pages。</p>
+        <a class="muted-link" href="../index-zh.html#projects">返回項目</a>
+      </div>
+    </footer>
+
+    <script src="../script.js"></script>
+  </body>
+</html>
