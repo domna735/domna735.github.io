@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>Immersive Elderly Engagement System (XR) — Donovan Ma</title>
+    <meta
+      name="description"
+      content="An XR service-learning project combining 360° virtual walks, photogrammetry/point-cloud reconstructions, and Joy-Con interaction in Unity to support elderly well-being and digital inclusion."
+    />
+
+    <link rel="alternate" hreflang="en" href="immersive-elderly-engagement-system.html" />
+    <link rel="alternate" hreflang="zh-HK" href="immersive-elderly-engagement-system-zh.html" />
+
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" href="data:," />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../index.html#top" aria-label="Go to home">Donovan Ma</a>
+          <span class="brand-sub">Information Security · ML/CV · Real-time Systems</span>
+        </div>
+
+        <nav class="nav" aria-label="Primary">
+          <a class="nav-link" href="../index.html#projects">Projects</a>
+          <a class="nav-link" href="../index.html#education">Education</a>
+          <a class="nav-link" href="../index.html#skills">Skills</a>
+          <a class="nav-link" href="../index.html#experience">Experience</a>
+          <a class="nav-link" href="../index.html#contact">Contact</a>
+          <a class="nav-link" href="immersive-elderly-engagement-system-zh.html" lang="zh-HK">中文</a>
+          <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="Toggle theme">Theme</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">Key project</p>
+          <h1 class="hero-title">Immersive Elderly Engagement System (XR)</h1>
+          <p class="hero-lede">
+            A service-learning XR deployment combining 360° virtual walks and photogrammetry / point-cloud reconstructions,
+            delivered through a Joy-Con controlled Unity application for elderly engagement and digital inclusion.
+          </p>
+
+          <div class="hero-cta">
+            <a class="btn" href="https://github.com/domna735/Immersive-Elderly-Engagement-System-XR-" target="_blank" rel="noopener">GitHub repo</a>
+            <a class="btn" href="../index.html#contact">Request demo / materials</a>
+            <a class="btn btn-ghost" href="../index.html#projects">Back to projects</a>
+          </div>
+
+          <div class="callout">
+            <strong>Why it matters:</strong> The goal is not “XR for XR’s sake” — it is to design an interaction that elderly users can
+            learn quickly, and to use familiar places and culturally resonant scenes to support conversation, nostalgia, and well-being.
+            <div class="muted" style="margin-top: 8px;">
+              Note: due to dataset size and on-site privacy constraints, the public repo may not include all media / 3D assets.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="summary-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="summary-title">Executive summary</h2>
+            <p class="muted">360° virtual walk + 3D reconstruction + accessible interaction.</p>
+          </div>
+
+          <div class="prose">
+            <p>
+              This project designs and deploys an immersive digital experience for underprivileged elderly residents in Yunnan,
+              combining:
+            </p>
+            <ul class="bullets">
+              <li><strong>360° virtual walks:</strong> video-based exploration of culturally significant locations.</li>
+              <li><strong>High-fidelity 3D reconstruction:</strong> photogrammetry / point-cloud assets (e.g., <code>.ply</code>) of familiar spaces.</li>
+              <li><strong>Unity interaction with Joy-Con:</strong> intuitive navigation and motion-driven feedback.</li>
+            </ul>
+            <p>
+              During on-site deployment and user testing, we observed increased emotional engagement, nostalgia, and social interaction
+              among participants — highlighting how immersive technologies can support well-being, memory, and digital inclusion.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="overview-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="overview-title">System overview</h2>
+            <p class="muted">Designed for users with limited digital literacy.</p>
+          </div>
+
+          <div class="prose">
+            <h3>User flow</h3>
+            <ol class="bullets">
+              <li><strong>Main menu:</strong> browse destinations (each destination maps to a video clip / scene).</li>
+              <li><strong>Experience scene:</strong> play the selected 360° walk with an overlay UI (progress, distance, step count).</li>
+              <li><strong>Settings panel:</strong> pause/resume, return to menu, and adjust sensitivity.</li>
+            </ol>
+
+            <h3>Interaction design goals</h3>
+            <ul class="bullets">
+              <li><strong>Repeatable controls:</strong> simple button and stick inputs; consistent mapping across scenes.</li>
+              <li><strong>Activity-driven feedback:</strong> video playback can respond to motion (IMU gyro magnitude).</li>
+              <li><strong>Accessibility:</strong> large, readable UI and minimal cognitive load.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="controls-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="controls-title">Controls (Joy-Con)</h2>
+            <p class="muted">Designed for learnability and low error-rate.</p>
+          </div>
+
+          <div class="prose">
+            <div class="table-wrap" role="region" aria-label="Joy-Con controls table" tabindex="0">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Context</th>
+                    <th>Input</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Main menu</td>
+                    <td>D-Pad Left / Right</td>
+                    <td>Previous / next destination</td>
+                  </tr>
+                  <tr>
+                    <td>Main menu</td>
+                    <td>Shoulder button (confirm)</td>
+                    <td>Enter experience scene with selected clip</td>
+                  </tr>
+                  <tr>
+                    <td>Experience</td>
+                    <td>Stick</td>
+                    <td>Rotate camera (yaw / pitch)</td>
+                  </tr>
+                  <tr>
+                    <td>Experience</td>
+                    <td>IMU motion (gyro magnitude)</td>
+                    <td>Auto play/pause based on activity threshold</td>
+                  </tr>
+                  <tr>
+                    <td>Experience</td>
+                    <td>Shoulder button</td>
+                    <td>Open settings panel (pauses video)</td>
+                  </tr>
+                  <tr>
+                    <td>Settings panel</td>
+                    <td>D-Pad Down</td>
+                    <td>Close settings panel (resumes video)</td>
+                  </tr>
+                  <tr>
+                    <td>Settings panel</td>
+                    <td>D-Pad Up</td>
+                    <td>Return to main menu</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="muted">
+              A mouse fallback can be used during development; the primary deployment target is Joy-Con.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="pipeline-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="pipeline-title">Content pipeline</h2>
+            <p class="muted">Capture → reconstruction → Unity integration.</p>
+          </div>
+
+          <div class="prose">
+            <ul class="bullets">
+              <li><strong>360° capture:</strong> on-site 360 camera capture (Insta360) plus supplementary aerial footage where available.</li>
+              <li><strong>3D reconstruction:</strong> photogrammetry tooling (e.g., LumaAI) to produce reconstructions and point clouds.</li>
+              <li><strong>Unity integration:</strong> selectable 360 clips, UI overlays, and interaction logic.</li>
+              <li><strong>Optional advanced rendering:</strong> point-based / splatting-style rendering is a future path for higher fidelity 3D viewing.</li>
+            </ul>
+            <p>
+              The system intentionally keeps the user-facing experience simple while leaving a path to incorporate richer 3D assets as
+              device capability and deployment constraints allow.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="deployment-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="deployment-title">On-site deployment & outcomes</h2>
+            <p class="muted">Qualitative results from service-learning deployment.</p>
+          </div>
+
+          <div class="prose">
+            <h3>Observed outcomes</h3>
+            <ul class="bullets">
+              <li>Initial hesitation shifted to curiosity and enjoyment after brief acclimatisation.</li>
+              <li>Participants showed nostalgia when recognising familiar environments (a strong engagement trigger).</li>
+              <li>Sessions often became social: users shared stories and memories while exploring together.</li>
+            </ul>
+
+            <h3>Challenges encountered</h3>
+            <ul class="bullets">
+              <li><strong>Technical robustness:</strong> occasional lag / synchronisation issues can break immersion.</li>
+              <li><strong>Communication barriers:</strong> varied digital literacy required more patient instruction and simpler explanations.</li>
+              <li><strong>On-site constraints:</strong> space, noise, and setup logistics shaped session pacing and reliability.</li>
+            </ul>
+
+            <h3>Guiding theme</h3>
+            <p>
+              Empathetic technology, delivered with sincere human connection and collaborative dedication, can uplift broken spirits by
+              bridging the digital divide.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="limitations-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="limitations-title">Limitations & next steps</h2>
+          </div>
+
+          <div class="prose">
+            <ul class="bullets">
+              <li><strong>Input consistency:</strong> standardise axis mappings and consider migrating to Unity’s newer Input System.</li>
+              <li><strong>Media scalability:</strong> large video datasets can bloat builds; consider Addressables / AssetBundles for scale.</li>
+              <li><strong>Step detection:</strong> replace basic thresholding with filtered peak detection and per-device calibration.</li>
+              <li><strong>Joy-Con reliability:</strong> improve connection UX, disconnect handling, and explicit controller selection.</li>
+              <li><strong>Accessibility iteration:</strong> co-design with elderly users earlier; add larger fonts and simplified navigation where needed.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="run-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="run-title">How to run (high-level)</h2>
+            <p class="muted">For recruiters: steps are intentionally concise and reproducible.</p>
+          </div>
+
+          <div class="prose">
+            <ol class="bullets">
+              <li>Open the Unity project in a compatible Unity Editor version (Unity 6 / 2022 LTS depending on branch/tooling).</li>
+              <li>Load the menu scene and press Play.</li>
+              <li>Pair Joy-Con(s) over Bluetooth (Windows) and verify input recognition.</li>
+              <li>Select a destination to start the 360° walk experience.</li>
+            </ol>
+            <p class="muted">Detailed build notes and media can be shared upon request.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p class="muted">© <span id="year"></span> Donovan Ma. Built with plain HTML/CSS for GitHub Pages.</p>
+        <a class="muted-link" href="#main">Back to top</a>
+      </div>
+    </footer>
+
+    <script src="../script.js"></script>
+  </body>
+</html>

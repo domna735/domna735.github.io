@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="zh-HK">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>沉浸式長者互動系統（XR）— 馬啟崙</title>
+    <meta
+      name="description"
+      content="以 Unity 開發並部署之服務學習 XR 項目：結合 360° 虛擬步行、photogrammetry／點雲重建與 Joy-Con 互動設計，以支援長者身心福祉與數碼共融。"
+    />
+
+    <link rel="alternate" hreflang="en" href="immersive-elderly-engagement-system.html" />
+    <link rel="alternate" hreflang="zh-HK" href="immersive-elderly-engagement-system-zh.html" />
+
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" href="data:," />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">跳到內容</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../index-zh.html#top" aria-label="返回首頁">馬啟崙</a>
+          <span class="brand-sub">資訊保安 · 機器學習／電腦視覺 · 即時系統</span>
+        </div>
+
+        <nav class="nav" aria-label="主導覽">
+          <a class="nav-link" href="../index-zh.html#projects">項目</a>
+          <a class="nav-link" href="../index-zh.html#education">學歷</a>
+          <a class="nav-link" href="../index-zh.html#skills">技能</a>
+          <a class="nav-link" href="../index-zh.html#experience">經驗</a>
+          <a class="nav-link" href="../index-zh.html#contact">聯絡</a>
+          <a class="nav-link" href="immersive-elderly-engagement-system.html" lang="en">EN</a>
+          <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="切換主題">主題</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">重點項目</p>
+          <h1 class="hero-title">沉浸式長者互動系統（XR）</h1>
+          <p class="hero-lede">
+            一個服務學習部署項目：以 Unity + Joy-Con 互動設計為核心，結合 360° 虛擬步行與 photogrammetry／點雲重建，促進長者參與、回憶與數碼共融。
+          </p>
+
+          <div class="hero-cta">
+            <a class="btn" href="https://github.com/domna735/Immersive-Elderly-Engagement-System-XR-" target="_blank" rel="noopener">GitHub 專案</a>
+            <a class="btn" href="../index-zh.html#contact">可應要求提供示範／材料</a>
+            <a class="btn btn-ghost" href="../index-zh.html#projects">返回項目</a>
+          </div>
+
+          <div class="callout">
+            <strong>重點：</strong>本項目並非單純追求「炫技 XR」，而是以長者可快速學習的操作為前提，透過熟悉場景與具文化意義的內容，促進對話、共鳴與身心福祉。
+            <div class="muted" style="margin-top: 8px;">註：由於資料量及現場私隱等限制，公開 repo 未必包含所有影片／3D 資產。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="summary-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="summary-title">摘要（CV／海報版本）</h2>
+            <p class="muted">360° 虛擬步行 + 3D 重建 + 無障礙互動設計。</p>
+          </div>
+
+          <div class="prose">
+            <p>
+              本項目為雲南弱勢長者設計並部署沉浸式數碼體驗，整合以下三個要素：
+            </p>
+            <ul class="bullets">
+              <li><strong>360° 虛擬步行：</strong>以 360 影片方式探索具文化意義之地點。</li>
+              <li><strong>高擬真 3D 重建：</strong>以 photogrammetry／點雲資產（例如 <code>.ply</code>）重建熟悉環境。</li>
+              <li><strong>Unity + Joy-Con 互動：</strong>以簡單可重複的操控支援導覽與動作回饋。</li>
+            </ul>
+            <p>
+              於現場部署與使用者測試期間，我們觀察到參與者的情緒投入、懷舊感及社交互動有所提升，顯示沉浸式技術可在適切的互動設計與人本服務安排下，支援長者身心福祉、記憶連結及數碼共融。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="overview-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="overview-title">系統概覽</h2>
+            <p class="muted">以「低數碼素養使用者」為主要設計對象。</p>
+          </div>
+
+          <div class="prose">
+            <h3>使用流程</h3>
+            <ol class="bullets">
+              <li><strong>主選單：</strong>瀏覽多個目的地（每個目的地對應一段影片／場景）。</li>
+              <li><strong>體驗場景：</strong>播放所選 360° 虛擬步行內容，並顯示 UI 疊加資訊（進度、路程、步數）。</li>
+              <li><strong>設定面板：</strong>暫停／繼續、返回主選單，以及調整敏感度。</li>
+            </ol>
+
+            <h3>互動設計目標</h3>
+            <ul class="bullets">
+              <li><strong>可學習性：</strong>以簡單按鍵與搖桿為主，跨場景操作一致。</li>
+              <li><strong>動作回饋：</strong>可按 IMU 動作幅度控制播放（例如活動不足時自動暫停）。</li>
+              <li><strong>無障礙：</strong>強調可讀性與降低認知負擔（大字體、簡化導覽）。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="controls-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="controls-title">控制方式（Joy-Con）</h2>
+            <p class="muted">以易學、低出錯率為設計原則。</p>
+          </div>
+
+          <div class="prose">
+            <div class="table-wrap" role="region" aria-label="Joy-Con 控制表" tabindex="0">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>情境</th>
+                    <th>輸入</th>
+                    <th>動作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>主選單</td>
+                    <td>方向鍵 左／右</td>
+                    <td>上一個／下一個目的地</td>
+                  </tr>
+                  <tr>
+                    <td>主選單</td>
+                    <td>肩鍵（確認）</td>
+                    <td>進入體驗場景並載入所選內容</td>
+                  </tr>
+                  <tr>
+                    <td>體驗</td>
+                    <td>搖桿</td>
+                    <td>旋轉視角（yaw／pitch）</td>
+                  </tr>
+                  <tr>
+                    <td>體驗</td>
+                    <td>IMU 動作（陀螺儀幅度）</td>
+                    <td>按活動閾值自動播放／暫停</td>
+                  </tr>
+                  <tr>
+                    <td>體驗</td>
+                    <td>肩鍵</td>
+                    <td>開啟設定面板（並暫停影片）</td>
+                  </tr>
+                  <tr>
+                    <td>設定面板</td>
+                    <td>方向鍵 下</td>
+                    <td>關閉設定面板（並恢復播放）</td>
+                  </tr>
+                  <tr>
+                    <td>設定面板</td>
+                    <td>方向鍵 上</td>
+                    <td>返回主選單</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="muted">開發期間可使用滑鼠作為後備輸入；部署以 Joy-Con 為主。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="pipeline-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="pipeline-title">內容製作流程</h2>
+            <p class="muted">拍攝 → 重建 → Unity 整合。</p>
+          </div>
+
+          <div class="prose">
+            <ul class="bullets">
+              <li><strong>360° 拍攝：</strong>以 Insta360 進行現場 360 拍攝；如條件允許，加入航拍素材作補充。</li>
+              <li><strong>3D 重建：</strong>以 photogrammetry 工具（例如 LumaAI）產出重建模型與點雲。</li>
+              <li><strong>Unity 整合：</strong>將 360 內容、UI 疊加與互動邏輯整合成可運行應用。</li>
+              <li><strong>進階渲染（可擴展）：</strong>未來可研究以點基渲染／splatting 類方法提升 3D 呈現品質。</li>
+            </ul>
+            <p>
+              我們刻意把使用者端體驗保持簡潔，同時預留路徑讓系統可在硬件能力與部署限制允許時，逐步納入更高擬真的 3D 資產。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="deployment-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="deployment-title">現場部署與反思</h2>
+            <p class="muted">服務學習現場觀察之定性成果。</p>
+          </div>
+
+          <div class="prose">
+            <h3>觀察到的成果</h3>
+            <ul class="bullets">
+              <li>初期抗拒與猶疑可在短時間適應後轉化為好奇與愉悅。</li>
+              <li>當參與者辨認到熟悉環境時，會觸發明顯的懷舊與情緒投入（強烈的互動驅動因素）。</li>
+              <li>體驗常自然轉為社交活動：使用者會邊探索邊分享故事與回憶。</li>
+            </ul>
+
+            <h3>主要挑戰</h3>
+            <ul class="bullets">
+              <li><strong>系統穩定性：</strong>偶發卡頓／同步問題會中斷沉浸感。</li>
+              <li><strong>溝通障礙：</strong>數碼素養差異大，需更耐心且更直觀的引導。</li>
+              <li><strong>現場限制：</strong>空間、噪音與設備安排影響流程節奏與可靠性。</li>
+            </ul>
+
+            <h3>主題句</h3>
+            <p>
+              以同理心為本的科技，配合真誠的人際互動與協作，能透過縮窄數碼落差，為受壓抑的精神帶來支持與重建。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="limitations-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="limitations-title">限制與後續方向</h2>
+          </div>
+
+          <div class="prose">
+            <ul class="bullets">
+              <li><strong>輸入一致性：</strong>統一 axis 映射，並評估遷移至 Unity 新 Input System 的成本與收益。</li>
+              <li><strong>媒體規模化：</strong>大量影片可能令 build 變大；可考慮 Addressables／AssetBundles。</li>
+              <li><strong>步數偵測：</strong>以濾波 + peak detection 取代簡單閾值，並加入裝置校準流程。</li>
+              <li><strong>Joy-Con 可靠性：</strong>改善連線狀態提示、斷線處理，以及控制器選擇。</li>
+              <li><strong>無障礙迭代：</strong>更早進行共同設計（co-design）與可用性測試，持續簡化介面與導覽。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="run-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="run-title">如何運行（高層次）</h2>
+            <p class="muted">求職用途：以簡短、可重現的描述呈現。</p>
+          </div>
+
+          <div class="prose">
+            <ol class="bullets">
+              <li>以相容的 Unity Editor 版本開啟專案（Unity 6／或 2022 LTS，視分支與工具而定）。</li>
+              <li>載入主選單場景並按 Play。</li>
+              <li>於 Windows 透過藍牙配對 Joy-Con，並確認輸入被正確辨識。</li>
+              <li>選擇目的地以開始 360° 體驗。</li>
+            </ol>
+            <p class="muted">如需要更完整的 build／媒體與部署筆記，可聯絡我安排提供。</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p class="muted">© <span id="year"></span> 馬啟崙。以純 HTML/CSS 建置並部署於 GitHub Pages。</p>
+        <a class="muted-link" href="#main">回到頁首</a>
+      </div>
+    </footer>
+
+    <script src="../script.js"></script>
+  </body>
+</html>
