@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>Project pages — Donovan Ma</title>
+    <meta name="description" content="A directory of key project detail pages (EN + zh-HK)." />
+
+    <link rel="alternate" hreflang="en" href="index.html" />
+    <link rel="alternate" hreflang="zh-HK" href="index-zh.html" />
+
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" href="data:," />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../index.html#top" aria-label="Go to home">Donovan Ma</a>
+          <span class="brand-sub">Information Security · ML/CV · Real-time Systems</span>
+        </div>
+
+        <nav class="nav" aria-label="Primary">
+          <a class="nav-link" href="../index.html#projects">Projects</a>
+          <a class="nav-link" href="../index.html#education">Education</a>
+          <a class="nav-link" href="../index.html#skills">Skills</a>
+          <a class="nav-link" href="../index.html#experience">Experience</a>
+          <a class="nav-link" href="../index.html#contact">Contact</a>
+          <a class="nav-link" href="index-zh.html" lang="zh-HK">中文</a>
+          <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="Toggle theme">Theme</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">Directory</p>
+          <h1 class="hero-title">Project pages</h1>
+          <p class="hero-lede">A simple index of the detailed project write-ups (English + zh-HK pairs).</p>
+
+          <div class="hero-cta">
+            <a class="btn" href="../index.html#projects">Back to homepage projects</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="list-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="list-title">Key projects</h2>
+            <p class="muted">Titles link to the English page; “中文” opens the zh-HK page.</p>
+          </div>
+
+          <div class="cards">
+            <article class="card">
+              <div class="card-head">
+                <h3><a class="card-title-link" href="real-time-fer.html">Real-Time Facial Expression Recognition System</a></h3>
+                <p class="tags">PyTorch · OpenCV · ONNX Runtime · MobileNetV3</p>
+              </div>
+              <div class="card-actions">
+                <a class="btn btn-small btn-ghost" href="real-time-fer.html">EN</a>
+                <a class="btn btn-small btn-ghost" href="real-time-fer-zh.html" lang="zh-HK">中文</a>
+                <a
+                  class="btn btn-small btn-ghost"
+                  href="https://github.com/domna735/Real-time-Facial-Expression-Recognition-System"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  GitHub
+                </a>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3><a class="card-title-link" href="multimodal-virtual-communication-system.html">Multimodal Virtual Communication System (MVP)</a></h3>
+                <p class="tags">Python · ONNX Runtime · (Optional) Azure OpenAI/Speech</p>
+              </div>
+              <div class="card-actions">
+                <a class="btn btn-small btn-ghost" href="multimodal-virtual-communication-system.html">EN</a>
+                <a class="btn btn-small btn-ghost" href="multimodal-virtual-communication-system-zh.html" lang="zh-HK">中文</a>
+                <a
+                  class="btn btn-small btn-ghost"
+                  href="https://github.com/domna735/Multimodal-Virtual-Communication-System"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  GitHub
+                </a>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3><a class="card-title-link" href="generative-adversarial-phonology.html">Generative Adversarial Phonology (ciwGAN)</a></h3>
+                <p class="tags">TensorFlow · WGAN-GP · SpecGAN · Speech generation</p>
+              </div>
+              <div class="card-actions">
+                <a class="btn btn-small btn-ghost" href="generative-adversarial-phonology.html">EN</a>
+                <a class="btn btn-small btn-ghost" href="generative-adversarial-phonology-zh.html" lang="zh-HK">中文</a>
+                <a
+                  class="btn btn-small btn-ghost"
+                  href="https://github.com/domna735/Vowel_length_contrasts_in_deep_learning_Generative_Adversarial_Phonology_and_duration"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  GitHub
+                </a>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3><a class="card-title-link" href="immersive-elderly-engagement-system.html">Immersive Elderly Engagement System (XR)</a></h3>
+                <p class="tags">Unity · 360 capture · Photogrammetry · Joy-Con interaction</p>
+              </div>
+              <div class="card-actions">
+                <a class="btn btn-small btn-ghost" href="immersive-elderly-engagement-system.html">EN</a>
+                <a class="btn btn-small btn-ghost" href="immersive-elderly-engagement-system-zh.html" lang="zh-HK">中文</a>
+                <a
+                  class="btn btn-small btn-ghost"
+                  href="https://github.com/domna735/Immersive-Elderly-Engagement-System-XR-"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  GitHub
+                </a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p class="muted">© <span id="year"></span> Donovan Ma. Built with plain HTML/CSS for GitHub Pages.</p>
+        <a class="muted-link" href="#main">Back to top</a>
+      </div>
+    </footer>
+
+    <script src="../script.js"></script>
+  </body>
+</html>

@@ -44,6 +44,10 @@ Homepages:
 - `index.html` (English)
 - `index-zh.html` (Traditional Chinese, zh-HK)
 
+Other top-level pages:
+
+- `404.html` (lightweight not-found page)
+
 Key project detail pages (English + zh-HK pairs):
 
 - `projects/multimodal-virtual-communication-system.html`
@@ -54,6 +58,11 @@ Key project detail pages (English + zh-HK pairs):
 - `projects/generative-adversarial-phonology-zh.html`
 - `projects/immersive-elderly-engagement-system.html`
 - `projects/immersive-elderly-engagement-system-zh.html`
+
+Project directory pages:
+
+- `projects/index.html` (English)
+- `projects/index-zh.html` (Traditional Chinese, zh-HK)
 
 Shared assets:
 
@@ -151,9 +160,28 @@ High-value enhancements that keep the site static and fast:
 
 - Add OpenGraph/Twitter meta tags for nicer sharing previews.
 - Add 1–2 screenshots per project (compressed, with alt text).
-- Add a simple `projects/` landing page if the number of projects grows.
-- Consider a short “Evidence” block on each project page: what is public now vs available on request.
-- Add a lightweight `404.html` for GitHub Pages.
+
+Recently implemented (2026-02-05):
+
+- Added a lightweight `404.html` for GitHub Pages.
+- Added a `projects/` landing page (`projects/index.html` + `projects/index-zh.html`).
+- Added an “Evidence” section to each project page (public now vs available on request).
+
+Still optional / later:
+
+- Add OpenGraph/Twitter meta tags for nicer sharing previews.
+- Add 1–2 screenshots per project (compressed, with alt text).
+- If needed, add a short “Evidence” summary on the homepage cards (keep the homepage skimmable).
+
+## 10) Improvement checklist (practical)
+
+If iterating further, this is a sensible order of work:
+
+1) **Content credibility (highest ROI):** ensure each project has 1–2 concrete outcomes, plus clear public evidence links.
+2) **Recruiter navigation:** keep homepage “Details/詳情” direct links; use `projects/` only as a secondary directory.
+3) **Evidence packaging:** add small, curated artifacts (screenshots, short clips, sample outputs) instead of large raw folders.
+4) **SEO/shareability (optional):** OpenGraph/Twitter meta tags once content stabilises.
+5) **Accessibility polish:** ensure link text is descriptive; keep tables scrollable; keep headings in a logical hierarchy.
 
 ---
 
