@@ -1,6 +1,6 @@
 # Personal Website Report (Static Portfolio)
 
-Document date: 2026-02-05
+Document date: 2026-02-06
 
 ## 1) Purpose and target audience
 
@@ -83,6 +83,7 @@ The homepages follow the same recruiter-oriented structure:
   - short bullet outcomes
   - tags/keywords
   - evidence links (GitHub/Demo/Details)
+- **STEM curriculum & teaching materials** section (materials are not linked publicly; available on request / 可按需要提供).
 - **Skills** grouped for readability.
 - **Experience** summarised for web format.
 - **Contact** and CV download.
@@ -165,7 +166,8 @@ Recently implemented (2026-02-05):
 
 - Added a lightweight `404.html` for GitHub Pages.
 - Added a `projects/` landing page (`projects/index.html` + `projects/index-zh.html`).
-- Added an “Evidence” section to each project page (public now vs available on request).
+- Added an “Evidence” section to each project page (public now vs available on request / 可按需要提供).
+- Added a “STEM curriculum & teaching materials” section to both homepages (materials available on request / 可按需要提供).
 
 Still optional / later:
 
