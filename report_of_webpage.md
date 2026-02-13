@@ -167,7 +167,7 @@ High-value enhancements that keep the site static and fast:
 - Add OpenGraph/Twitter meta tags for nicer sharing previews.
 - Add 1–2 screenshots per project (compressed, with alt text).
 
-Recently implemented (2026-02-06):
+Recently implemented (2026-02-13):
 
 - Added a lightweight `404.html` for GitHub Pages.
 - Added a `projects/` landing page (`projects/index.html` + `projects/index-zh.html`).
