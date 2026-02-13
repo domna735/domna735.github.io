@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://domna735.github.io/sitemap.xml
