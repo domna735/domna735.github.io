@@ -48,6 +48,10 @@ Other top-level pages:
 
 - `404.html` (lightweight not-found page)
 
+Shared assets:
+
+- `assets/favicon.svg` (site favicon, "DM" monogram)
+
 Key project detail pages (English + zh-HK pairs):
 
 - `projects/multimodal-virtual-communication-system.html`
