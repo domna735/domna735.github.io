@@ -1,6 +1,6 @@
 # Personal Website Report (Static Portfolio)
 
-Document date: 2026-02-06
+Document date: 2026-02-13
 
 ## 1) Purpose and target audience
 
@@ -127,6 +127,11 @@ This consistency helps recruiters learn the site once and then move quickly betw
 - Includes a clear section on on-site outcomes, challenges, and an explicit limitations/next steps list.
 - Repo link is provided; public release may exclude large media/3D datasets depending on constraints.
 
+### 6.5 STEM curriculum & teaching materials
+
+- Includes a UGOT Robotics Competition Training (7-lesson series) structure on the homepage to demonstrate curriculum design and teaching focus.
+- Teaching slide decks / handouts are intentionally not published as direct downloads by default; they are **available on request / 可按需要提供** via the Contact section.
+
 ## 7) Styling and accessibility summary
 
 Styling goals:
@@ -162,12 +167,14 @@ High-value enhancements that keep the site static and fast:
 - Add OpenGraph/Twitter meta tags for nicer sharing previews.
 - Add 1–2 screenshots per project (compressed, with alt text).
 
-Recently implemented (2026-02-05):
+Recently implemented (2026-02-06):
 
 - Added a lightweight `404.html` for GitHub Pages.
 - Added a `projects/` landing page (`projects/index.html` + `projects/index-zh.html`).
 - Added an “Evidence” section to each project page (public now vs available on request / 可按需要提供).
 - Added a “STEM curriculum & teaching materials” section to both homepages (materials available on request / 可按需要提供).
+- Standardised zh-HK phrasing from “可應要求提供” to “可按需要提供” across the site.
+- Updated the downloadable CV PDF (`assets/cv.pdf`).
 
 Still optional / later:
 
