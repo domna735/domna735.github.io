@@ -77,8 +77,53 @@
     btn.addEventListener("click", toggleTheme);
   };
 
+  const initVisitorCounter = async () => {
+    const statsWrap = document.getElementById("visitorStats");
+    const el = document.getElementById("visitorCount");
+    const showStats = new URLSearchParams(window.location.search).get("stats") === "1";
+
+    const namespace = "domna735";
+    const key = "personal-website-total-views";
+    const sessionKey = "donovan-visitor-counter-counted-v1";
+
+    let action = "hit";
+    try {
+      if (sessionStorage.getItem(sessionKey) === "1") action = "get";
+    } catch {
+      // ignore
+    }
+
+    try {
+      const url = `https://api.countapi.xyz/${action}/${namespace}/${key}`;
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Counter request failed: ${response.status}`);
+
+      const data = await response.json();
+      if (typeof data.value !== "number") throw new Error("Invalid counter response");
+
+      if (action === "hit") {
+        try {
+          sessionStorage.setItem(sessionKey, "1");
+        } catch {
+          // ignore
+        }
+      }
+
+      if (showStats) {
+        if (statsWrap) statsWrap.hidden = false;
+        if (el) el.textContent = new Intl.NumberFormat().format(data.value);
+      }
+    } catch {
+      if (showStats) {
+        if (statsWrap) statsWrap.hidden = false;
+        if (el) el.textContent = el.getAttribute("data-fallback") || "Unavailable";
+      }
+    }
+  };
+
   initTheme();
   initYear();
   initCopyEmail();
   initThemeToggle();
+  initVisitorCounter();
 })();
