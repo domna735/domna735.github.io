@@ -1,6 +1,6 @@
 # Personal Website Report (Static Portfolio)
 
-Document date: 2026-02-13
+Document date: 2026-03-06
 
 ## 1) Purpose and target audience
 
@@ -72,6 +72,7 @@ Shared assets:
 
 - `styles.css` (global styling)
 - `script.js` (theme toggle, copy email, footer year)
+- `assets/favicon.svg` (site favicon, "DM" monogram)
 - `assets/cv.pdf` (CV PDF download)
 
 ## 4) Homepage structure (English and Chinese)
@@ -168,21 +169,22 @@ Typical edits:
 
 High-value enhancements that keep the site static and fast:
 
-- Add OpenGraph/Twitter meta tags for nicer sharing previews.
 - Add 1–2 screenshots per project (compressed, with alt text).
 
-Recently implemented (2026-02-13):
+Recently implemented:
 
 - Added a lightweight `404.html` for GitHub Pages.
 - Added a `projects/` landing page (`projects/index.html` + `projects/index-zh.html`).
 - Added an “Evidence” section to each project page (public now vs available on request / 可按需要提供).
 - Added a “STEM curriculum & teaching materials” section to both homepages (materials available on request / 可按需要提供).
 - Standardised zh-HK phrasing from “可應要求提供” to “可按需要提供” across the site.
-- Updated the downloadable CV PDF (`assets/cv.pdf`).
+- Added canonical URLs + OpenGraph/Twitter meta tags on both homepages.
+- Added `sitemap.xml` + `robots.txt`.
+- Added favicon (`assets/favicon.svg`).
+- Updated the downloadable CV PDF (`assets/cv.pdf`) to version 3.1.
 
 Still optional / later:
 
-- Add OpenGraph/Twitter meta tags for nicer sharing previews.
 - Add 1–2 screenshots per project (compressed, with alt text).
 - If needed, add a short “Evidence” summary on the homepage cards (keep the homepage skimmable).
 
