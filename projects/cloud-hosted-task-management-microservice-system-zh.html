@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="zh-HK">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>雲端託管任務管理微服務系統 — 馬啟崙</title>
+    <meta
+      name="description"
+      content="一個以 Spring Boot 建構的雲端可部署微服務：涵蓋 Session 驗證、使用者任務管理、計算 API、可重現驗證流程，以及 EC2/RDS 部署素材。"
+    />
+
+    <link rel="alternate" hreflang="en" href="cloud-hosted-task-management-microservice-system.html" />
+    <link rel="alternate" hreflang="zh-HK" href="cloud-hosted-task-management-microservice-system-zh.html" />
+
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">跳到內容</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../index-zh.html#top" aria-label="返回首頁">馬啟崙</a>
+          <span class="brand-sub">資訊保安 · 機器學習／電腦視覺 · 即時系統</span>
+        </div>
+
+        <nav class="nav" aria-label="主導覽">
+          <a class="nav-link" href="../index-zh.html#projects">項目</a>
+          <a class="nav-link" href="../index-zh.html#education">學歷</a>
+          <a class="nav-link" href="../index-zh.html#skills">技能</a>
+          <a class="nav-link" href="../index-zh.html#experience">經驗</a>
+          <a class="nav-link" href="../index-zh.html#contact">聯絡</a>
+          <a class="nav-link" href="cloud-hosted-task-management-microservice-system.html" lang="en">EN</a>
+          <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="切換主題">主題</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">重點項目</p>
+          <h1 class="hero-title">雲端託管任務管理微服務系統</h1>
+          <p class="hero-lede">
+            一個可雲端部署的 Spring Boot 微服務，整合 Session 驗證、使用者任務管理與計算工具 API，
+            並強調可重現測試流程與部署導向工程實踐。
+          </p>
+
+          <div class="hero-cta">
+            <a class="btn" href="https://github.com/domna735/COMP4442-semester-project-Group14" target="_blank" rel="noopener">GitHub 專案</a>
+            <a class="btn btn-ghost" href="../index-zh.html#projects">返回項目</a>
+          </div>
+
+          <div class="callout">
+            <strong>核心重點：</strong>不只「API 可用」，而是具備課程規模 production-style 特質：
+            清晰架構、安全邊界、可重現驗證，以及雲端部署準備度。
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="evidence-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="evidence-title">證據與公開狀態</h2>
+            <p class="muted">說明目前可公開內容與可按需要提供材料。</p>
+          </div>
+
+          <div class="prose">
+            <ul class="bullets">
+              <li>
+                <strong>現已公開：</strong>
+                <a href="https://github.com/domna735/COMP4442-semester-project-Group14" target="_blank" rel="noopener">COMP4442 semester project repository</a>
+                （原始碼、腳本、設定與說明文件）。
+              </li>
+              <li>
+                <strong>可按需要提供：</strong>
+                驗證流程輸出、部署演示紀錄與課程匯報版本的技術摘要。
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="summary-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="summary-title">執行摘要</h2>
+            <p class="muted">COMP4442 Group 14 · 最後更新：2026-03-29</p>
+          </div>
+
+          <div class="prose">
+            <p>
+              Cloud Compute Service 將三項功能整合為一致的後端平台：Session 驗證、使用者任務 CRUD，以及計算工具 API。
+              系統採用分層式 Spring Boot 架構（Controller、Service、Repository、Entity），
+              並在不同層次落實安全與驗證控制。
+            </p>
+            <ul class="bullets">
+              <li>驗證 API：register、login、logout、current user。</li>
+              <li>任務 API：create、list、get-by-id、update、delete。</li>
+              <li>Compute API：service ping 與算術計算。</li>
+              <li>提供靜態前端頁面支援註冊、登入及任務操作流程。</li>
+              <li>整合測試 + smoke scripts，確保行為可重現與可驗證。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="arch-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="arch-title">架構與安全模型</h2>
+            <p class="muted">分層設計，並以架構層面確保使用者擁有權隔離。</p>
+          </div>
+
+          <div class="prose">
+            <pre><code>Controller → Service → Repository → Database
+
+身分來源：
+Spring Security SecurityContext（Session）
+
+擁有權傳遞：
+Authenticated principal → service logic → user-scoped repository queries</code></pre>
+            <ul class="bullets">
+              <li>採用 Spring Security 的 session-based 驗證；客戶端以 JSESSIONID 維持登入狀態。</li>
+              <li>密碼以 BCrypt 雜湊儲存，不保存明文密碼。</li>
+              <li>任務資料查詢以使用者維度限制（例如 findByIdAndUserId），避免跨使用者讀寫。</li>
+              <li>未授權 API 會回應 401；受保護頁面在未登入時會導向登入頁。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="verification-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="verification-title">驗證與可重現性</h2>
+          </div>
+
+          <div class="prose">
+            <ul class="bullets">
+              <li>整合測試覆蓋驗證流程、受保護路由、任務 CRUD 生命週期與錯誤語義。</li>
+              <li>smoke scripts 提供快速 API 健康檢查，降低 demo 前回歸風險。</li>
+              <li>one-command 開發腳本可啟動服務、等待就緒並自動執行 smoke 驗證。</li>
+              <li>register 端點之 201 Created 契約已與腳本及文件對齊，避免誤報失敗。</li>
+            </ul>
+
+            <details class="details">
+              <summary>典型 smoke 驗證流程</summary>
+              <div class="prose">
+                <pre><code>Ping → Register (201) → Login → Current user
+→ Create task (201) → List tasks → Logout</code></pre>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="deployment-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="deployment-title">雲端部署準備</h2>
+          </div>
+
+          <div class="prose">
+            <ul class="bullets">
+              <li>透過 profile-based configuration 分離本地與生產環境設定。</li>
+              <li>開發環境使用 H2，提升本地迭代速度。</li>
+              <li>生產環境透過環境變數注入資料庫設定（EC2 + RDS 目標場景）。</li>
+              <li>部署素材包含 runtime templates、verifier scripts 與 systemd unit template。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="next-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="next-title">限制與後續方向</h2>
+          </div>
+
+          <ul class="bullets">
+            <li>CSRF 策略可針對更完整生產情境再強化。</li>
+            <li>以 Flyway 或 Liquibase 取代 schema auto-update。</li>
+            <li>加入登入濫用防護（rate limit、lockout 等）。</li>
+            <li>任務列表可加入 pagination 與篩選能力。</li>
+            <li>強化可觀測性：結構化日誌、指標、追蹤與告警。</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="repo-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="repo-title">Repository</h2>
+          </div>
+
+          <div class="callout">
+            <p>
+              GitHub：
+              <a href="https://github.com/domna735/COMP4442-semester-project-Group14" target="_blank" rel="noopener">
+                COMP4442-semester-project-Group14
+              </a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p class="muted">© <span id="year"></span> 馬啟崙。以純 HTML/CSS 建置並部署於 GitHub Pages。</p>
+        <a class="muted-link" href="../index-zh.html#projects">返回項目</a>
+      </div>
+    </footer>
+
+    <script src="../script.js"></script>
+  </body>
+</html>

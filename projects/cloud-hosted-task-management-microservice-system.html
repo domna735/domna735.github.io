@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>Cloud-Hosted Task Management Microservice System — Donovan Ma</title>
+    <meta
+      name="description"
+      content="A Spring Boot cloud-ready microservice project with session-based authentication, user-scoped task management, compute APIs, reproducible verification, and EC2/RDS deployment assets."
+    />
+
+    <link rel="alternate" hreflang="en" href="cloud-hosted-task-management-microservice-system.html" />
+    <link rel="alternate" hreflang="zh-HK" href="cloud-hosted-task-management-microservice-system-zh.html" />
+
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../index.html#top" aria-label="Go to home">Donovan Ma</a>
+          <span class="brand-sub">Information Security · ML/CV · Real-time Systems</span>
+        </div>
+
+        <nav class="nav" aria-label="Primary">
+          <a class="nav-link" href="../index.html#projects">Projects</a>
+          <a class="nav-link" href="../index.html#education">Education</a>
+          <a class="nav-link" href="../index.html#skills">Skills</a>
+          <a class="nav-link" href="../index.html#experience">Experience</a>
+          <a class="nav-link" href="../index.html#contact">Contact</a>
+          <a class="nav-link" href="cloud-hosted-task-management-microservice-system-zh.html" lang="zh-HK">中文</a>
+          <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="Toggle theme">Theme</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">Key project</p>
+          <h1 class="hero-title">Cloud-Hosted Task Management Microservice System</h1>
+          <p class="hero-lede">
+            A cloud-ready Spring Boot microservice for session authentication, user-scoped task management, and compute utility APIs,
+            built with reproducible testing and deployment-oriented engineering workflows.
+          </p>
+
+          <div class="hero-cta">
+            <a class="btn" href="https://github.com/domna735/COMP4442-semester-project-Group14" target="_blank" rel="noopener">GitHub repo</a>
+            <a class="btn btn-ghost" href="../index.html#projects">Back to projects</a>
+          </div>
+
+          <div class="callout">
+            <strong>Focus:</strong> not only functional APIs, but production-style engineering discipline for a semester project:
+            architecture clarity, security boundaries, reproducible verification, and cloud deployment readiness.
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="evidence-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="evidence-title">Evidence</h2>
+            <p class="muted">What is public now vs available on request.</p>
+          </div>
+
+          <div class="prose">
+            <ul class="bullets">
+              <li>
+                <strong>Public now:</strong>
+                <a href="https://github.com/domna735/COMP4442-semester-project-Group14" target="_blank" rel="noopener">COMP4442 semester project repository</a>
+                (source code, scripts, and setup documentation).
+              </li>
+              <li>
+                <strong>Available on request:</strong>
+                detailed verification walkthrough outputs, deployment demo notes, and report excerpts used for course presentation.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="summary-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="summary-title">Executive summary</h2>
+            <p class="muted">COMP4442 Group 14 · last update: 2026-03-29.</p>
+          </div>
+
+          <div class="prose">
+            <p>
+              Cloud Compute Service combines three capabilities in one coherent backend: session-based authentication,
+              user-scoped task CRUD, and a utility compute API. The service is implemented as a layered Spring Boot application
+              (Controller, Service, Repository, Entity) with security and validation controls across boundaries.
+            </p>
+            <ul class="bullets">
+              <li>Authentication APIs: register, login, logout, and current-user retrieval.</li>
+              <li>Task APIs: create, list, get-by-id, update, and delete.</li>
+              <li>Compute APIs: service ping and arithmetic calculation endpoints.</li>
+              <li>Static frontend pages for register/login/task workflows.</li>
+              <li>Repeatable verification via integration tests and smoke scripts.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="arch-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="arch-title">Architecture and security model</h2>
+            <p class="muted">Layered design with ownership isolation by construction.</p>
+          </div>
+
+          <div class="prose">
+            <pre><code>Controller → Service → Repository → Database
+
+Auth identity source:
+Spring Security SecurityContext (session-backed)
+
+Ownership path:
+Authenticated principal → service methods → user-scoped repository queries</code></pre>
+            <ul class="bullets">
+              <li>Session authentication is handled by Spring Security; client state is carried by JSESSIONID cookie.</li>
+              <li>Passwords are stored as BCrypt hashes (never plaintext).</li>
+              <li>Task queries are ownership-constrained (for example: findByIdAndUserId) to prevent cross-user data access.</li>
+              <li>Protected APIs return 401 when unauthenticated; protected pages redirect to login.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="verification-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="verification-title">Verification and reproducibility</h2>
+          </div>
+
+          <div class="prose">
+            <ul class="bullets">
+              <li>Automated integration tests cover auth flow, protected routes, task CRUD lifecycle, and error semantics.</li>
+              <li>Smoke scripts provide fast API-level confidence checks before demos and pushes.</li>
+              <li>One-command development script starts the service, waits for readiness, and runs smoke validation.</li>
+              <li>Status-code alignment was enforced in scripts/documentation (register endpoint uses 201 Created).</li>
+            </ul>
+
+            <details class="details">
+              <summary>Typical smoke check sequence</summary>
+              <div class="prose">
+                <pre><code>Ping → Register (201) → Login → Current user
+→ Create task (201) → List tasks → Logout</code></pre>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="deployment-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="deployment-title">Cloud deployment readiness</h2>
+          </div>
+
+          <div class="prose">
+            <ul class="bullets">
+              <li>Profile-based configuration separates local development and production runtime concerns.</li>
+              <li>Development profile uses H2 for fast local iteration.</li>
+              <li>Production profile externalizes datasource via environment variables (EC2 + RDS scenario).</li>
+              <li>Deployment assets include runtime templates, verifier scripts, and systemd service templates.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="next-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="next-title">Limitations and next steps</h2>
+          </div>
+
+          <ul class="bullets">
+            <li>Revisit CSRF strategy for broader production contexts.</li>
+            <li>Replace schema auto-update with migration tooling (Flyway or Liquibase).</li>
+            <li>Add login abuse protection (rate limiting, lockout policies).</li>
+            <li>Introduce pagination/filtering for task listing and larger datasets.</li>
+            <li>Expand observability with structured logs, metrics, tracing, and alerts.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="repo-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="repo-title">Repository</h2>
+          </div>
+
+          <div class="callout">
+            <p>
+              GitHub:
+              <a href="https://github.com/domna735/COMP4442-semester-project-Group14" target="_blank" rel="noopener">
+                COMP4442-semester-project-Group14
+              </a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p class="muted">© <span id="year"></span> Donovan Ma. Built with plain HTML/CSS for GitHub Pages.</p>
+        <a class="muted-link" href="../index.html#projects">Back to projects</a>
+      </div>
+    </footer>
+
+    <script src="../script.js"></script>
+  </body>
+</html>
