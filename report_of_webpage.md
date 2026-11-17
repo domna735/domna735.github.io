@@ -83,6 +83,8 @@ The homepages follow the same recruiter-oriented structure:
 - **Hero section** with concise identity statement and quick links (Email, LinkedIn, GitHub).
 - **Highlights KPI strip** to surface a few numeric, high-signal achievements.
 - **Professional summary** as short bullets.
+- **Target roles** with current software, backend, cloud, security, and ML directions.
+- **Selected publication** with the AMP DOI link.
 - **Education** summary.
 - **Key projects** section with:
   - short bullet outcomes
@@ -137,6 +139,11 @@ This consistency helps recruiters learn the site once and then move quickly betw
 - Includes a UGOT Robotics Competition Training (7-lesson series) structure on the homepage to demonstrate curriculum design and teaching focus.
 - Teaching slide decks / handouts are intentionally not published as direct downloads by default; they are **available on request / 可按需要提供** via the Contact section.
 
+### 6.6 Current Software Engineering role
+
+- The homepage now reflects Donovan's current Software Engineer role at eSOON China Limited.
+- Highlights include secure backend development, Genesys Cloud routing and migration workflows, Terraform (CX as Code), Python automation, and incident response for telephony security incidents.
+
 ## 7) Styling and accessibility summary
 
 Styling goals:
@@ -181,7 +188,7 @@ Recently implemented:
 - Added canonical URLs + OpenGraph/Twitter meta tags on both homepages.
 - Added `sitemap.xml` + `robots.txt`.
 - Added favicon (`assets/favicon.svg`).
-- Updated the downloadable CV PDF (`assets/cv.pdf`) to version 3.1.
+- Updated the downloadable CV PDF (`assets/cv.pdf`) to the latest two-page version.
 
 Still optional / later:
 

@@ -7,7 +7,7 @@ This is a simple, fast personal website built with plain HTML/CSS/JS (great for 
 - `index.html` – page content (your CV-based sections)
 - `styles.css` – styling
 - `script.js` – theme toggle + copy-email helper
-- `assets/cv.pdf` – your CV PDF (linked from the page)
+- `assets/cv.pdf` – your latest two-page CV PDF (linked from the page)
 
 ## Quick edits you’ll likely want
 
