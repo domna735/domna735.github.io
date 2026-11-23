@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Genesys Cloud Migration &amp; Dependency Platform — Donovan Ma</title>
+    <meta
+      name="description"
+      content="A private multi-environment Genesys Cloud migration platform using Java, Vue.js, Terraform CX as Code, dependency scanning, drift validation, staged apply, and audit controls."
+    />
+    <link rel="alternate" hreflang="en" href="genesys-cloud-migration-platform.html" />
+    <link rel="alternate" hreflang="zh-HK" href="genesys-cloud-migration-platform-zh.html" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../index.html#top" aria-label="Go to home">Donovan Ma</a>
+          <span class="brand-sub">Information Security · ML/CV · Real-time Systems</span>
+        </div>
+        <nav class="nav" aria-label="Primary">
+          <a class="nav-link" href="../index.html#projects">Projects</a>
+          <a class="nav-link" href="../index.html#education">Education</a>
+          <a class="nav-link" href="../index.html#skills">Skills</a>
+          <a class="nav-link" href="../index.html#experience">Experience</a>
+          <a class="nav-link" href="../index.html#contact">Contact</a>
+          <a class="nav-link" href="genesys-cloud-migration-platform-zh.html" lang="zh-HK">中文</a>
+          <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="Toggle theme">Theme</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">Key project · Private source</p>
+          <h1 class="hero-title">Genesys Cloud Migration &amp; Dependency Platform</h1>
+          <p class="hero-lede">
+            A cross-organisation migration platform that synchronises Genesys Cloud resources through Terraform,
+            dependency scanning, structured diff review, approval controls, staged apply, rollback, and audit evidence.
+          </p>
+          <div class="hero-cta">
+            <a class="btn" href="../index.html#projects">Back to projects</a>
+            <span class="muted">Source code private — no public repository</span>
+          </div>
+          <div class="callout">
+            <strong>Core contribution:</strong> built the automation workflow that joins resource discovery, Terraform
+            HCL generation, dependency closure, drift validation, and controlled deployment across source and target environments.
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="overview-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="overview-title">Project overview</h2>
+            <p class="muted">Private enterprise implementation · Java, Vue.js, Terraform CX as Code, and Genesys Cloud</p>
+          </div>
+          <div class="prose">
+            <p>
+              The platform provides two migration entry points: operator-created migration tasks and scheduled automatic
+              synchronisation. Both share one task engine and state model, while scheduled tasks bypass manual approval only
+              after the plan stage is complete. The implementation is designed for cross-organisation resource deployment,
+              dependency-safe execution, and traceable recovery.
+            </p>
+            <ul class="bullets">
+              <li>Encrypted OAuth credentials with production environment identification and read-only connectivity checks.</li>
+              <li>Resource inventory and snapshot baseline generation across supported Genesys Cloud resource types.</li>
+              <li>Terraform mapping and HCL rendering, followed by <code>init → plan → show</code> and structured diff parsing.</li>
+              <li>Dependency graph closure, field-level review, staged apply, pause/resume controls, and snapshot rollback.</li>
+              <li>CSV and user-comparison reports, terminal logs, and audit records for operational evidence.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="flow-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="flow-title">Migration full flow</h2>
+            <p class="muted">The workflow spans user operations, the backend engine, and the target Genesys Cloud organisation.</p>
+          </div>
+
+          <div class="flow-map">
+            <div class="flow-lane">
+              <div class="flow-lane-title"><strong>EGCS-UI · Vue.js</strong><span>User and approval operations</span></div>
+              <div class="flow-stages">
+                <article class="flow-stage"><span class="flow-stage-no">01</span><strong>Environment management</strong><small>OAuth client and production marking</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">02</span><strong>Connectivity test</strong><small>Organisation, permissions, and live resource count</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">03</span><strong>Resource browser</strong><small>Resource index and snapshot baseline</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">04</span><strong>Create task</strong><small>Manual migration wizard</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">05</span><strong>Schedule sync</strong><small>Automatic scheduled execution</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">06</span><strong>Dependency review</strong><small>Missing, duplicate, or circular dependencies</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">07</span><strong>HCL workspace</strong><small>Rendered Terraform resources</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">08</span><strong>Plan review</strong><small>Structured Terraform plan and state</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">09</span><strong>Diff approval</strong><small>Field-level additions, changes, and deletions</small></article>
+                <article class="flow-stage is-gate"><span class="flow-stage-no">10</span><strong>Migration confirmation</strong><small>Six-digit production verification code</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">11</span><strong>Apply execution</strong><small>Import and layered deployment</small></article>
+                <article class="flow-stage is-warning"><span class="flow-stage-no">12</span><strong>Pause and intervene</strong><small>Layer or failure policy approval</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">13</span><strong>Evidence and report</strong><small>Logs, exports, audit, and final status</small></article>
+              </div>
+            </div>
+
+            <div class="flow-lane">
+              <div class="flow-lane-title"><strong>SyncEngine · Java</strong><span>Backend orchestration and state transitions</span></div>
+              <div class="flow-stages">
+                <article class="flow-stage"><span class="flow-stage-no">01</span><strong>Encrypt secrets</strong><small>Credentials stored with AES-256-GCM</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">02</span><strong>SDK validation</strong><small>Organisation and resource permission checks</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">03</span><strong>Snapshot service</strong><small>Resource index and rollback baseline</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">04</span><strong>Create migration task</strong><small>Manual task enters CREATED status</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">05</span><strong>Scheduled task</strong><small>Scheduled sync creates and runs tasks automatically</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">06</span><strong>Dependency closure</strong><small>Registry, resource graph, scope resolver</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">07</span><strong>Map and render</strong><small>SDK models become Terraform resources</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">08</span><strong>Terraform executor</strong><small>Init, plan, show, timeout, and log streaming</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">09</span><strong>State machine</strong><small>CREATED → DIFFING → REVIEW → PLANNED</small></article>
+                <article class="flow-stage is-gate"><span class="flow-stage-no">10</span><strong>Production gate</strong><small>Code, retry limit, lock, and unlock rules</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">11</span><strong>Import and batch apply</strong><small>Dependency layers applied in sequence</small></article>
+                <article class="flow-stage is-warning"><span class="flow-stage-no">12</span><strong>Failure handling</strong><small>Pause, resume, skip error, or abort</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">13</span><strong>Task completion</strong><small>Success, partial success, or failure audit</small></article>
+              </div>
+            </div>
+          </div>
+
+          <details class="details">
+            <summary>Two execution entry points</summary>
+            <div class="prose">
+              <ul class="bullets">
+                <li><strong>Manual migration task:</strong> select resources, configure execution, review the diff and dependencies, confirm, and then apply.</li>
+                <li><strong>Scheduled migration:</strong> the scheduler creates and executes the task automatically after plan generation, with no manual approval step.</li>
+                <li>Both entry points use the same task model and enforce one active task group per target environment.</li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="engine-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="engine-title">Engineering highlights</h2>
+          </div>
+          <div class="feature-grid">
+            <div class="panel"><h3 class="panel-title">Terraform orchestration</h3><p>Terraform resources are generated from SDK models, executed in isolated workspaces, and parsed into structured state and diff evidence.</p></div>
+            <div class="panel"><h3 class="panel-title">Dependency safety</h3><p>Flow YAML references, resource registration, graph resolution, and scope validation prevent incomplete or invalid cross-organisation migrations.</p></div>
+            <div class="panel"><h3 class="panel-title">Security controls</h3><p>Secrets are encrypted at rest, credentials are not written into HCL, and production apply requires a short-lived verification code.</p></div>
+            <div class="panel"><h3 class="panel-title">Operational recovery</h3><p>Snapshot rollback, layer pause, resume, and skip-error handling support safe recovery from partial or interrupted deployments.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="public-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="public-title">Source and evidence status</h2>
+            <p class="muted">Enterprise project source is private.</p>
+          </div>
+          <div class="prose">
+            <ul class="bullets">
+              <li><strong>Source code:</strong> private and not publicly available.</li>
+              <li><strong>Demonstration:</strong> architecture and workflow descriptions are available for portfolio review.</li>
+              <li><strong>Implementation evidence:</strong> source, screenshots, logs, and deployment walkthrough can be shared only through an authorised review process.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p class="muted">© <span id="year"></span> Donovan Ma.</p>
+        <a class="muted-link" href="../index.html#projects">Back to projects</a>
+      </div>
+    </footer>
+    <script src="../script.js"></script>
+  </body>
+</html>

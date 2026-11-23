@@ -507,6 +507,101 @@ h3 {
   color: var(--muted);
 }
 
+/* Project migration-flow diagrams */
+.flow-map {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.flow-lanes {
+  display: grid;
+  gap: 12px;
+}
+
+.flow-lane {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--bg-elev) 78%, transparent);
+  padding: 14px;
+  overflow: hidden;
+}
+
+.flow-lane-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.flow-lane-title strong {
+  color: var(--text);
+}
+
+.flow-lane-title span {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.flow-stages {
+  display: grid;
+  grid-template-columns: repeat(13, minmax(118px, 1fr));
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.flow-stage {
+  min-height: 104px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 68%, var(--bg-elev));
+  padding: 10px;
+}
+
+.flow-stage-no {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.flow-stage strong {
+  display: block;
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+
+.flow-stage small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.flow-stage.is-gate {
+  border-color: color-mix(in srgb, var(--accent-2) 48%, var(--border));
+}
+
+.flow-stage.is-warning {
+  border-color: rgba(248, 113, 113, 0.45);
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+}
+
+.feature-grid .panel {
+  grid-column: span 12;
+}
+
 /* Footer */
 .site-footer {
   border-top: 1px solid var(--border);
@@ -528,6 +623,10 @@ h3 {
   }
 
   .panel {
+    grid-column: span 6;
+  }
+
+  .feature-grid .panel {
     grid-column: span 6;
   }
 

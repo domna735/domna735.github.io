@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-HK">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Genesys Cloud 多環境遷移及依賴分析平台 — 馬啟崙</title>
+    <meta
+      name="description"
+      content="以 Java、Vue.js、Terraform CX as Code 建立的私人 Genesys Cloud 多環境遷移平台，支援依賴分析、漂移驗證、分層部署及稽核控制。"
+    />
+    <link rel="alternate" hreflang="en" href="genesys-cloud-migration-platform.html" />
+    <link rel="alternate" hreflang="zh-HK" href="genesys-cloud-migration-platform-zh.html" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">跳到主要內容</a>
+
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <a class="brand-link" href="../index-zh.html#top" aria-label="返回首頁">馬啟崙</a>
+          <span class="brand-sub">資訊保安 · 機器學習／電腦視覺 · 即時系統</span>
+        </div>
+        <nav class="nav" aria-label="主導覽">
+          <a class="nav-link" href="../index-zh.html#projects">項目</a>
+          <a class="nav-link" href="../index-zh.html#education">學歷</a>
+          <a class="nav-link" href="../index-zh.html#skills">技能</a>
+          <a class="nav-link" href="../index-zh.html#experience">經驗</a>
+          <a class="nav-link" href="../index-zh.html#contact">聯絡</a>
+          <a class="nav-link" href="genesys-cloud-migration-platform.html" lang="en">EN</a>
+          <button id="themeToggle" class="btn btn-ghost" type="button" aria-label="切換主題">主題</button>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="container">
+          <p class="eyebrow">重點項目 · 原始碼私人</p>
+          <h1 class="hero-title">Genesys Cloud 多環境遷移及依賴分析平台</h1>
+          <p class="hero-lede">
+            一個跨組織遷移平台，以 Terraform 同步 Genesys Cloud 資源，涵蓋依賴掃描、結構化差異審核、
+            核准控制、分層部署、回滾及稽核證據。
+          </p>
+          <div class="hero-cta">
+            <a class="btn" href="../index-zh.html#projects">返回項目</a>
+            <span class="muted">原始碼為私人專案 — 不公開存放庫</span>
+          </div>
+          <div class="callout">
+            <strong>核心貢獻：</strong>建立資源發現、Terraform HCL 生成、依賴閉包、漂移驗證及受控部署於同一條工作流。
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="overview-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="overview-title">項目概覽</h2>
+            <p class="muted">私人企業項目 · Java、Vue.js、Terraform CX as Code 及 Genesys Cloud</p>
+          </div>
+          <div class="prose">
+            <p>
+              平台提供兩種遷移入口：操作員建立的遷移任務，以及定時自動同步。
+              兩種入口共用同一個任務引擎及狀態模型；定時任務只會在 Plan 階段完成後跳過人工審批。
+              系統以跨組織資源部署、依賴安全執行及可追溯恢復為設計目標。
+            </p>
+            <ul class="bullets">
+              <li>加密儲存 OAuth 憑證，支援生產環境識別及只讀連通性檢查。</li>
+              <li>支援多類 Genesys Cloud 資源的庫存瀏覽及快照基準建立。</li>
+              <li>實作 Terraform 資源映射及 HCL 生成，隨後執行 <code>init → plan → show</code>及結構化差異解析。</li>
+              <li>支援依賴圖閉包、欄位級審核、分層 Apply、暫停/恢復及快照回滾。</li>
+              <li>提供 CSV、使用者對比報告、終端日誌及稽核紀錄。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="flow-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 id="flow-title">完整遷移流程</h2>
+            <p class="muted">流程橫跨使用者操作、後端引擎及目標 Genesys Cloud 組織。</p>
+          </div>
+
+          <div class="flow-map">
+            <div class="flow-lane">
+              <div class="flow-lane-title"><strong>EGCS-UI · Vue.js</strong><span>使用者及核准操作</span></div>
+              <div class="flow-stages">
+                <article class="flow-stage"><span class="flow-stage-no">01</span><strong>環境管理</strong><small>OAuth 客戶端及生產環境標記</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">02</span><strong>連通性測試</strong><small>組織、權限及即時資源數量</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">03</span><strong>資源瀏覽</strong><small>資源索引及快照基準</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">04</span><strong>建立任務</strong><small>手動遷移精靈</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">05</span><strong>設定定時同步</strong><small>自動定時執行</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">06</span><strong>依賴審核</strong><small>缺失、重複或循環依賴</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">07</span><strong>HCL 工作區</strong><small>已渲染的 Terraform 資源</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">08</span><strong>Plan 審核</strong><small>結構化 Terraform Plan及狀態</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">09</span><strong>差異核准</strong><small>欄位級新增、變更及刪除</small></article>
+                <article class="flow-stage is-gate"><span class="flow-stage-no">10</span><strong>遷移確認</strong><small>生產環境六位驗證碼</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">11</span><strong>Apply 執行</strong><small>Import及分層部署</small></article>
+                <article class="flow-stage is-warning"><span class="flow-stage-no">12</span><strong>暫停及介入</strong><small>分層或失敗策略核准</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">13</span><strong>證據及報告</strong><small>日誌、匯出、稽核及最終狀態</small></article>
+              </div>
+            </div>
+
+            <div class="flow-lane">
+              <div class="flow-lane-title"><strong>SyncEngine · Java</strong><span>後端編排及狀態轉移</span></div>
+              <div class="flow-stages">
+                <article class="flow-stage"><span class="flow-stage-no">01</span><strong>加密憑證</strong><small>AES-256-GCM 儲存敏感資訊</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">02</span><strong>SDK 驗證</strong><small>組織及資源權限檢查</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">03</span><strong>快照服務</strong><small>資源索引及回滾基準</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">04</span><strong>建立遷移任務</strong><small>手動任務進入 CREATED 狀態</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">05</span><strong>定時任務</strong><small>定時器建立及執行任務</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">06</span><strong>依賴閉包</strong><small>註冊表、資源圖及範圍解析</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">07</span><strong>映射及渲染</strong><small>SDK 模型轉為 Terraform 資源</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">08</span><strong>Terraform 執行</strong><small>init、plan、show、逾時及日誌串流</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">09</span><strong>狀態機</strong><small>CREATED → DIFFING → REVIEW → PLANNED</small></article>
+                <article class="flow-stage is-gate"><span class="flow-stage-no">10</span><strong>生產門檻</strong><small>驗證碼、重試、鎖定及解鎖規則</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">11</span><strong>Import及批量 Apply</strong><small>依賴分層依序部署</small></article>
+                <article class="flow-stage is-warning"><span class="flow-stage-no">12</span><strong>失敗處理</strong><small>暫停、恢復、略過錯誤或中止</small></article>
+                <article class="flow-stage"><span class="flow-stage-no">13</span><strong>任務收尾</strong><small>成功、部分成功或失敗稽核</small></article>
+              </div>
+            </div>
+          </div>
+
+          <details class="details">
+            <summary>兩種執行入口</summary>
+            <div class="prose">
+              <ul class="bullets">
+                <li><strong>手動遷移任務：</strong>選擇資源、設定執行計劃、審核差異及依賴、確認後再 Apply。</li>
+                <li><strong>定時遷移：</strong>Plan 完成後由定時器建立及執行任務，無需人工審批。</li>
+                <li>兩種入口共用同一任務模型，並限制每個目標環境只允許一組未完成任務。</li>
+              </ul>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="engine-title">
+        <div class="container">
+          <div class="section-head"><h2 id="engine-title">工程重點</h2></div>
+          <div class="feature-grid">
+            <div class="panel"><h3 class="panel-title">Terraform 編排</h3><p>由 SDK 模型生成 Terraform 資源，在隔離工作區執行，並把狀態及差異解析為結構化證據。</p></div>
+            <div class="panel"><h3 class="panel-title">依賴安全</h3><p>透過 Flow YAML 引用掃描、資源註冊、圖形解析及範圍驗證，避免不完整或無效的跨組織遷移。</p></div>
+            <div class="panel"><h3 class="panel-title">安全控制</h3><p>憑證靜態加密、HCL 不寫入敏感值、生產環境 Apply 需短效驗證碼。</p></div>
+            <div class="panel"><h3 class="panel-title">運作恢復</h3><p>支援快照回滾、分層暫停、恢復及略過錯誤，以處理部分完成或中斷部署。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="public-title">
+        <div class="container">
+          <div class="section-head"><h2 id="public-title">原始碼及證據狀態</h2><p class="muted">企業項目原始碼為私人。</p></div>
+          <div class="prose">
+            <ul class="bullets">
+              <li><strong>原始碼：</strong>不公開，不會提供至公共存放庫。</li>
+              <li><strong>示範方式：</strong>履歷中可展示架構及工作流說明。</li>
+              <li><strong>實作證據：</strong>原始碼、截圖、日誌及部署演示只可透過授權審核流程分享。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p class="muted">© <span id="year"></span> 馬啟崙。</p>
+        <a class="muted-link" href="../index-zh.html#projects">返回項目</a>
+      </div>
+    </footer>
+    <script src="../script.js"></script>
+  </body>
+</html>
