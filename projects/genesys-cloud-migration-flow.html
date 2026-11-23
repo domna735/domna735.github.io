@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Genesys Cloud migration full flow</title>
+    <style>
+      :root { --bg:#0b0f14; --elev:#0f1620; --text:#e6edf3; --muted:#9fb0bf; --border:rgba(230,237,243,.12); --ui:#5ca6c7; --engine:#c19a78; --target:#73a878; --gate:#a78bfa; --warn:#f87171; }
+      * { box-sizing:border-box; }
+      html,body { height:100%; }
+      body { margin:0; overflow:hidden; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+      .topbar { height:78px; display:flex; align-items:flex-end; justify-content:space-between; gap:20px; padding:14px 22px 12px; border-bottom:1px solid var(--border); }
+      .brand { color:var(--muted); font-size:11px; letter-spacing:.16em; text-transform:uppercase; }
+      h1 { margin:3px 0 0; font-size:22px; letter-spacing:-.02em; }
+      .subtitle { max-width:480px; margin:0; color:var(--muted); font-size:12px; text-align:right; line-height:1.45; }
+      .rail { height:54px; display:grid; grid-template-columns:repeat(13,minmax(92px,1fr)); margin:0; padding:10px 22px 8px; list-style:none; overflow:auto hidden; border-bottom:1px solid var(--border); }
+      .rail li { min-width:92px; color:var(--muted); font-size:10.5px; border-top:1px solid var(--border); padding-top:6px; }
+      .rail li span { display:block; color:var(--gate); font-family:ui-monospace,monospace; }
+      .viewport { height:calc(100% - 132px); overflow:auto; padding:14px 22px 18px; }
+      .canvas { width:1320px; min-width:100%; }
+      .entry { width:470px; margin:0 auto 12px; display:grid; grid-template-columns:1fr 38px 1fr; align-items:center; gap:8px; }
+      .entry-card { border:1px solid var(--border); border-radius:10px; background:var(--elev); padding:8px 10px; text-align:center; }
+      .entry-card span { display:block; color:var(--muted); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; }
+      .entry-card strong { display:block; font-size:12px; }
+      .entry-card small { color:var(--muted); font-size:10px; }
+      .merge { text-align:center; color:var(--gate); font-size:18px; }
+      .lane { display:grid; grid-template-columns:150px 1fr; margin-bottom:8px; border:1px solid var(--border); border-radius:12px; background:rgba(15,22,32,.86); overflow:hidden; }
+      .lane-label { padding:12px; border-right:1px solid var(--border); }
+      .lane-label strong { display:block; font-size:13px; }
+      .lane-label span { color:var(--muted); font-size:10.5px; }
+      .lane-label i { display:inline-block; width:7px; height:7px; margin-right:7px; background:var(--lane); }
+      .grid { display:grid; grid-template-columns:repeat(13,92px); gap:6px; min-height:145px; padding:8px; }
+      .card { min-height:128px; border:1px solid var(--border); border-top:2px solid var(--lane); border-radius:8px; background:linear-gradient(180deg,rgba(255,255,255,.025),transparent); padding:9px; transition:.16s ease; }
+      .card:hover { transform:translateY(-2px); border-color:color-mix(in srgb,var(--lane) 55%,var(--border)); }
+      .card span { color:var(--lane); font-family:ui-monospace,monospace; font-size:9.5px; }
+      .card strong { display:block; margin:5px 0; font-size:11.5px; line-height:1.25; }
+      .card ul { margin:0; padding-left:13px; color:var(--muted); font-size:9.5px; line-height:1.38; }
+      .card li { margin:3px 0; }
+      .card.merge-card { border-style:dashed; }
+      .card.gate { border-top-color:var(--gate); }
+      .card.warn { border-top-color:var(--warn); }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div><div class="brand">EGCS · Genesys Cloud migration center</div><h1>Migration full flow</h1></div>
+      <p class="subtitle">Manual and scheduled entry points share one task model and one execution chain.</p>
+    </header>
+    <ol class="rail">
+      <li><span>01</span>Environment</li><li><span>02</span>Connectivity</li><li><span>03</span>Snapshot</li><li><span>04</span>Task</li><li><span>05</span>Schedule</li><li><span>06</span>Dependency</li><li><span>07</span>HCL</li><li><span>08</span>Plan</li><li><span>09</span>Review</li><li><span>10</span>Confirm</li><li><span>11</span>Apply</li><li><span>12</span>Guard</li><li><span>13</span>Result</li>
+    </ol>
+    <main class="viewport" aria-label="Migration flow diagram">
+      <div class="canvas">
+        <div class="entry">
+          <div class="entry-card"><span>Entry A · Manual</span><strong>Created migration task</strong><small>Requires diff approval</small></div>
+          <div class="merge">→</div>
+          <div class="entry-card"><span>Entry B · Scheduled</span><strong>Automatic sync task</strong><small>Plan-first execution</small></div>
+        </div>
+        <section class="lane" style="--lane:var(--ui)">
+          <div class="lane-label"><strong><i></i>EGCS-UI</strong><span>Vue.js · user operations</span></div>
+          <div class="grid">
+            <article class="card" style="grid-column:1"><span>01</span><strong>Create OAuth environment</strong><ul><li>Environment key and API domain</li><li>Production flag</li></ul></article>
+            <article class="card" style="grid-column:2"><span>02</span><strong>Probe connectivity</strong><ul><li>Organisation match</li><li>Permissions and resource count</li></ul></article>
+            <article class="card" style="grid-column:3"><span>03</span><strong>Browse and snapshot</strong><ul><li>23 resource types</li><li>Division-level baseline</li></ul></article>
+            <article class="card" style="grid-column:4"><span>04</span><strong>Migration wizard</strong><ul><li>Select resources</li><li>Configure DAG and mode</li></ul></article>
+            <article class="card" style="grid-column:5"><span>05</span><strong>Schedule sync</strong><ul><li>Period and target pair</li><li>Pause and retry policy</li></ul></article>
+            <article class="card" style="grid-column:9"><span>09</span><strong>Review diff</strong><ul><li>Added / changed / deleted fields</li><li>Live SSE logs</li></ul></article>
+            <article class="card gate" style="grid-column:10"><span>10</span><strong>Confirm migration</strong><ul><li>Review dependencies</li><li>Production code</li></ul></article>
+            <article class="card" style="grid-column:13"><span>13</span><strong>Evidence and report</strong><ul><li>CSV and audit exports</li><li>DataAction reports</li></ul></article>
+          </div>
+        </section>
+        <section class="lane" style="--lane:var(--engine)">
+          <div class="lane-label"><strong><i></i>SyncEngine</strong><span>Java · backend orchestration</span></div>
+          <div class="grid">
+            <article class="card" style="grid-column:1"><span>01</span><strong>Secure credentials</strong><ul><li>AES-256-GCM</li><li>Masked output and logs</li></ul></article>
+            <article class="card" style="grid-column:2"><span>02</span><strong>SDK validation</strong><ul><li>Users / divisions</li><li>Paginated 23-type scan</li></ul></article>
+            <article class="card merge-card" style="grid-column:4 / span 2"><span>04–05</span><strong>Unify entry points</strong><ul><li>Manual: CREATED and manual review</li><li>Scheduled: automatic chain</li></ul></article>
+            <article class="card" style="grid-column:6"><span>06</span><strong>Dependency closure</strong><ul><li>Resource graph</li><li>Flow YAML reference scan</li></ul></article>
+            <article class="card" style="grid-column:7"><span>07</span><strong>Map and render HCL</strong><ul><li>SDK to Terraform model</li><li>Workspace generation</li></ul></article>
+            <article class="card" style="grid-column:8"><span>08</span><strong>Init → plan → show</strong><ul><li>Structured diff parsing</li><li>State management</li></ul></article>
+            <article class="card" style="grid-column:9"><span>09</span><strong>Advance state machine</strong><ul><li>CREATED → DIFFING</li><li>DEPENDENCY_REVIEW → PLANNED</li></ul></article>
+            <article class="card gate" style="grid-column:10"><span>10</span><strong>Verification gate</strong><ul><li>6-digit code</li><li>Retry limit and lockout</li></ul></article>
+            <article class="card" style="grid-column:11"><span>11</span><strong>Import and batch apply</strong><ul><li>Terraform import existing resources</li><li>Layer-by-layer apply</li></ul></article>
+            <article class="card warn" style="grid-column:12"><span>12</span><strong>Pause and recover</strong><ul><li>Layer pending review</li><li>Resume or skip-error</li></ul></article>
+            <article class="card" style="grid-column:13"><span>13</span><strong>Close task</strong><ul><li>Success / partial / failed</li><li>Snapshot rollback if needed</li></ul></article>
+          </div>
+        </section>
+        <section class="lane" style="--lane:var(--target)">
+          <div class="lane-label"><strong><i></i>Genesys Cloud</strong><span>Source and target organisations</span></div>
+          <div class="grid">
+            <article class="card" style="grid-column:1"><span>01</span><strong>Authorise source</strong><ul><li>Client Credentials</li><li>Read scope</li></ul></article>
+            <article class="card" style="grid-column:2"><span>02</span><strong>Read source resources</strong><ul><li>Users / queues / flows</li><li>Data tables and actions</li></ul></article>
+            <article class="card" style="grid-column:3"><span>03</span><strong>Preserve baseline</strong><ul><li>Type and division snapshot</li><li>Restorable rollback point</li></ul></article>
+            <article class="card" style="grid-column:7"><span>07</span><strong>Terraform workspace</strong><ul><li>Task-isolated directory</li><li>Credentials injected by environment</li></ul></article>
+            <article class="card" style="grid-column:8"><span>08</span><strong>Plan and state</strong><ul><li>JSON / text plan</li><li>Terraform state store</li></ul></article>
+            <article class="card" style="grid-column:11"><span>11</span><strong>Write target organisation</strong><ul><li>Create / update / import</li><li>Layer-by-layer progress</li></ul></article>
+            <article class="card" style="grid-column:13"><span>13</span><strong>Effective target state</strong><ul><li>Flows and queues live</li><li>Visible in target admin console</li></ul></article>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

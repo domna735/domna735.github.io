@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-HK">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Genesys Cloud 完整遷移流程</title>
+    <style>
+      :root { --bg:#0b0f14; --elev:#0f1620; --text:#e6edf3; --muted:#9fb0bf; --border:rgba(230,237,243,.12); --ui:#5ca6c7; --engine:#c19a78; --target:#73a878; --gate:#a78bfa; --warn:#f87171; }
+      * { box-sizing:border-box; }
+      html,body { height:100%; }
+      body { margin:0; overflow:hidden; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Microsoft JhengHei","PingFang HK","Segoe UI",sans-serif; }
+      .topbar { height:78px; display:flex; align-items:flex-end; justify-content:space-between; gap:20px; padding:14px 22px 12px; border-bottom:1px solid var(--border); }
+      .brand { color:var(--muted); font-size:11px; letter-spacing:.16em; }
+      h1 { margin:3px 0 0; font-size:22px; letter-spacing:-.02em; }
+      .subtitle { max-width:480px; margin:0; color:var(--muted); font-size:12px; text-align:right; line-height:1.45; }
+      .rail { height:54px; display:grid; grid-template-columns:repeat(13,minmax(92px,1fr)); margin:0; padding:10px 22px 8px; list-style:none; overflow:auto hidden; border-bottom:1px solid var(--border); }
+      .rail li { min-width:92px; color:var(--muted); font-size:10.5px; border-top:1px solid var(--border); padding-top:6px; }
+      .rail li span { display:block; color:var(--gate); font-family:ui-monospace,monospace; }
+      .viewport { height:calc(100% - 132px); overflow:auto; padding:14px 22px 18px; }
+      .canvas { width:1320px; min-width:100%; }
+      .entry { width:470px; margin:0 auto 12px; display:grid; grid-template-columns:1fr 38px 1fr; align-items:center; gap:8px; }
+      .entry-card { border:1px solid var(--border); border-radius:10px; background:var(--elev); padding:8px 10px; text-align:center; }
+      .entry-card span { display:block; color:var(--muted); font-size:9.5px; letter-spacing:.08em; }
+      .entry-card strong { display:block; font-size:12px; }
+      .entry-card small { color:var(--muted); font-size:10px; }
+      .merge { text-align:center; color:var(--gate); font-size:18px; }
+      .lane { display:grid; grid-template-columns:150px 1fr; margin-bottom:8px; border:1px solid var(--border); border-radius:12px; background:rgba(15,22,32,.86); overflow:hidden; }
+      .lane-label { padding:12px; border-right:1px solid var(--border); }
+      .lane-label strong { display:block; font-size:13px; }
+      .lane-label span { color:var(--muted); font-size:10.5px; }
+      .lane-label i { display:inline-block; width:7px; height:7px; margin-right:7px; background:var(--lane); }
+      .grid { display:grid; grid-template-columns:repeat(13,92px); gap:6px; min-height:145px; padding:8px; }
+      .card { min-height:128px; border:1px solid var(--border); border-top:2px solid var(--lane); border-radius:8px; background:linear-gradient(180deg,rgba(255,255,255,.025),transparent); padding:9px; transition:.16s ease; }
+      .card:hover { transform:translateY(-2px); border-color:color-mix(in srgb,var(--lane) 55%,var(--border)); }
+      .card span { color:var(--lane); font-family:ui-monospace,monospace; font-size:9.5px; }
+      .card strong { display:block; margin:5px 0; font-size:11.5px; line-height:1.25; }
+      .card ul { margin:0; padding-left:13px; color:var(--muted); font-size:9.5px; line-height:1.38; }
+      .card li { margin:3px 0; }
+      .card.merge-card { border-style:dashed; }
+      .card.gate { border-top-color:var(--gate); }
+      .card.warn { border-top-color:var(--warn); }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div><div class="brand">EGCS · Genesys Cloud 遷移中心</div><h1>完整遷移流程</h1></div>
+      <p class="subtitle">手動建立任務及定時自動同步共用同一任務模型及執行鏈路。</p>
+    </header>
+    <ol class="rail">
+      <li><span>01</span>環境</li><li><span>02</span>連通性</li><li><span>03</span>快照</li><li><span>04</span>任務</li><li><span>05</span>定時</li><li><span>06</span>依賴</li><li><span>07</span>HCL</li><li><span>08</span>Plan</li><li><span>09</span>審核</li><li><span>10</span>確認</li><li><span>11</span>Apply</li><li><span>12</span>安全閘</li><li><span>13</span>結果</li>
+    </ol>
+    <main class="viewport" aria-label="完整遷移流程圖">
+      <div class="canvas">
+        <div class="entry">
+          <div class="entry-card"><span>入口 A · 手動</span><strong>建立遷移任務</strong><small>需要人工核准差異</small></div>
+          <div class="merge">→</div>
+          <div class="entry-card"><span>入口 B · 定時</span><strong>建立自動同步任務</strong><small>Plan 完成後直接執行</small></div>
+        </div>
+        <section class="lane" style="--lane:var(--ui)">
+          <div class="lane-label"><strong><i></i>EGCS-UI</strong><span>Vue.js · 使用者操作</span></div>
+          <div class="grid">
+            <article class="card" style="grid-column:1"><span>01</span><strong>建立 OAuth 環境</strong><ul><li>環境名稱及 API 網域</li><li>標記生產環境</li></ul></article>
+            <article class="card" style="grid-column:2"><span>02</span><strong>連通性探測</strong><ul><li>Organization ID 核對</li><li>權限及資源數量</li></ul></article>
+            <article class="card" style="grid-column:3"><span>03</span><strong>瀏覽及建立快照</strong><ul><li>23 類資源瀏覽</li><li>Division 級基準快照</li></ul></article>
+            <article class="card" style="grid-column:4"><span>04</span><strong>建立遷移任務</strong><ul><li>選擇資源及執行計劃</li><li>配置 DAG及執行模式</li></ul></article>
+            <article class="card" style="grid-column:5"><span>05</span><strong>設定定時同步</strong><ul><li>週期及環境對</li><li>暫停及重試策略</li></ul></article>
+            <article class="card" style="grid-column:9"><span>09</span><strong>審核差異</strong><ul><li>新增 / 變更 / 刪除欄位</li><li>即時 SSE 終端日誌</li></ul></article>
+            <article class="card gate" style="grid-column:10"><span>10</span><strong>確認遷移</strong><ul><li>核對差異及依賴</li><li>生產環境驗證碼</li></ul></article>
+            <article class="card" style="grid-column:13"><span>13</span><strong>證據及報告</strong><ul><li>CSV及稽核匯出</li><li>DataAction 未同步報告</li></ul></article>
+          </div>
+        </section>
+        <section class="lane" style="--lane:var(--engine)">
+          <div class="lane-label"><strong><i></i>SyncEngine</strong><span>Java · 後端編排</span></div>
+          <div class="grid">
+            <article class="card" style="grid-column:1"><span>01</span><strong>保護 OAuth 憑證</strong><ul><li>AES-256-GCM 加密</li><li>遮蔽回顯及日誌</li></ul></article>
+            <article class="card" style="grid-column:2"><span>02</span><strong>SDK 連通驗證</strong><ul><li>Users / divisions</li><li>23 類資源分頁掃描</li></ul></article>
+            <article class="card merge-card" style="grid-column:4 / span 2"><span>04–05</span><strong>統一兩種入口</strong><ul><li>手動任務停在差異審核</li><li>定時任務直接進入執行鏈路</li></ul></article>
+            <article class="card" style="grid-column:6"><span>06</span><strong>計算依賴閉包</strong><ul><li>ResourceRegistry及資源圖</li><li>Flow YAML 引用掃描</li></ul></article>
+            <article class="card" style="grid-column:7"><span>07</span><strong>映射及生成 HCL</strong><ul><li>SDK 模型轉 Terraform 資源</li><li>建立隔離工作區</li></ul></article>
+            <article class="card" style="grid-column:8"><span>08</span><strong>init → plan → show</strong><ul><li>結構化差異解析</li><li>管理 Terraform state</li></ul></article>
+            <article class="card" style="grid-column:9"><span>09</span><strong>推進狀態機</strong><ul><li>CREATED → DIFFING</li><li>DEPENDENCY_REVIEW → PLANNED</li></ul></article>
+            <article class="card gate" style="grid-column:10"><span>10</span><strong>驗證碼門檻</strong><ul><li>六位驗證碼</li><li>重試上限及鎖定規則</li></ul></article>
+            <article class="card" style="grid-column:11"><span>11</span><strong>Import及批量 Apply</strong><ul><li>Import 已存在資源</li><li>依賴分層逐層 Apply</li></ul></article>
+            <article class="card warn" style="grid-column:12"><span>12</span><strong>暫停及恢復</strong><ul><li>分層待人工核准</li><li>恢復、略過或中止</li></ul></article>
+            <article class="card" style="grid-column:13"><span>13</span><strong>任務收尾</strong><ul><li>成功 / 部分成功 / 失敗</li><li>需要時執行快照回滾</li></ul></article>
+          </div>
+        </section>
+        <section class="lane" style="--lane:var(--target)">
+          <div class="lane-label"><strong><i></i>Genesys Cloud</strong><span>來源及目標組織</span></div>
+          <div class="grid">
+            <article class="card" style="grid-column:1"><span>01</span><strong>授權來源組織</strong><ul><li>Client Credentials</li><li>只讀來源權限</li></ul></article>
+            <article class="card" style="grid-column:2"><span>02</span><strong>讀取來源資源</strong><ul><li>使用者 / Queue / Flow</li><li>Data Table及Action</li></ul></article>
+            <article class="card" style="grid-column:3"><span>03</span><strong>保留還原基準</strong><ul><li>依類型及Division快照</li><li>提供回滾還原點</li></ul></article>
+            <article class="card" style="grid-column:7"><span>07</span><strong>Terraform 工作區</strong><ul><li>每個任務獨立目錄</li><li>憑證透過環境變數注入</li></ul></article>
+            <article class="card" style="grid-column:8"><span>08</span><strong>Plan及State</strong><ul><li>JSON / Text Plan</li><li>Terraform 狀態存放</li></ul></article>
+            <article class="card" style="grid-column:11"><span>11</span><strong>寫入目標組織</strong><ul><li>Create / Update / Import</li><li>分層呈現進度</li></ul></article>
+            <article class="card" style="grid-column:13"><span>13</span><strong>目標環境已生效</strong><ul><li>Queue及Flow 正常運作</li><li>可在管理台核對</li></ul></article>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
