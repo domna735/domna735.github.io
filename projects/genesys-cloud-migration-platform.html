@@ -88,41 +88,69 @@
           </div>
 
           <div class="flow-map">
+            <ol class="flow-rail" aria-label="13 migration stages">
+              <li><span>01</span>Environment</li>
+              <li><span>02</span>Connectivity</li>
+              <li><span>03</span>Snapshot</li>
+              <li><span>04</span>Task</li>
+              <li><span>05</span>Schedule</li>
+              <li><span>06</span>Dependency</li>
+              <li><span>07</span>HCL</li>
+              <li><span>08</span>Plan</li>
+              <li><span>09</span>Review</li>
+              <li><span>10</span>Confirm</li>
+              <li><span>11</span>Apply</li>
+              <li><span>12</span>Guard</li>
+              <li><span>13</span>Result</li>
+            </ol>
+
+            <div class="flow-entry-bridge" aria-label="Manual and scheduled entry points">
+              <div><span>Entry A · Manual</span><strong>Created task</strong><small>Manual approval required</small></div>
+              <div class="flow-entry-merge" aria-hidden="true">→</div>
+              <div><span>Entry B · Scheduled</span><strong>Automatic sync</strong><small>Plan-first automatic run</small></div>
+            </div>
+
             <div class="flow-lane">
               <div class="flow-lane-title"><strong>EGCS-UI · Vue.js</strong><span>User and approval operations</span></div>
-              <div class="flow-stages">
-                <article class="flow-stage"><span class="flow-stage-no">01</span><strong>Environment management</strong><small>OAuth client and production marking</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">02</span><strong>Connectivity test</strong><small>Organisation, permissions, and live resource count</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">03</span><strong>Resource browser</strong><small>Resource index and snapshot baseline</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">04</span><strong>Create task</strong><small>Manual migration wizard</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">05</span><strong>Schedule sync</strong><small>Automatic scheduled execution</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">06</span><strong>Dependency review</strong><small>Missing, duplicate, or circular dependencies</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">07</span><strong>HCL workspace</strong><small>Rendered Terraform resources</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">08</span><strong>Plan review</strong><small>Structured Terraform plan and state</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">09</span><strong>Diff approval</strong><small>Field-level additions, changes, and deletions</small></article>
-                <article class="flow-stage is-gate"><span class="flow-stage-no">10</span><strong>Migration confirmation</strong><small>Six-digit production verification code</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">11</span><strong>Apply execution</strong><small>Import and layered deployment</small></article>
-                <article class="flow-stage is-warning"><span class="flow-stage-no">12</span><strong>Pause and intervene</strong><small>Layer or failure policy approval</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">13</span><strong>Evidence and report</strong><small>Logs, exports, audit, and final status</small></article>
+              <div class="flow-lane-grid">
+                <article class="flow-stage" style="grid-column:1"><span class="flow-stage-no">01</span><strong>Environment</strong><small>Create OAuth client and mark production</small></article>
+                <article class="flow-stage" style="grid-column:2"><span class="flow-stage-no">02</span><strong>Probe</strong><small>Show organisation, permissions, and resource count</small></article>
+                <article class="flow-stage" style="grid-column:3"><span class="flow-stage-no">03</span><strong>Browse</strong><small>Resource index and snapshot baseline</small></article>
+                <article class="flow-stage" style="grid-column:4"><span class="flow-stage-no">04</span><strong>Create task</strong><small>Three-step migration wizard</small></article>
+                <article class="flow-stage" style="grid-column:5"><span class="flow-stage-no">05</span><strong>Schedule</strong><small>Configure period and execution mode</small></article>
+                <article class="flow-stage" style="grid-column:9"><span class="flow-stage-no">09</span><strong>Review diff</strong><small>Field-level changes and dependency decisions</small></article>
+                <article class="flow-stage is-gate" style="grid-column:10"><span class="flow-stage-no">10</span><strong>Confirm</strong><small>Six-digit code for production targets</small></article>
+                <article class="flow-stage" style="grid-column:13"><span class="flow-stage-no">13</span><strong>Evidence</strong><small>Logs, CSV exports, audit, and dashboard</small></article>
               </div>
             </div>
 
             <div class="flow-lane">
               <div class="flow-lane-title"><strong>SyncEngine · Java</strong><span>Backend orchestration and state transitions</span></div>
-              <div class="flow-stages">
-                <article class="flow-stage"><span class="flow-stage-no">01</span><strong>Encrypt secrets</strong><small>Credentials stored with AES-256-GCM</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">02</span><strong>SDK validation</strong><small>Organisation and resource permission checks</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">03</span><strong>Snapshot service</strong><small>Resource index and rollback baseline</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">04</span><strong>Create migration task</strong><small>Manual task enters CREATED status</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">05</span><strong>Scheduled task</strong><small>Scheduled sync creates and runs tasks automatically</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">06</span><strong>Dependency closure</strong><small>Registry, resource graph, scope resolver</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">07</span><strong>Map and render</strong><small>SDK models become Terraform resources</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">08</span><strong>Terraform executor</strong><small>Init, plan, show, timeout, and log streaming</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">09</span><strong>State machine</strong><small>CREATED → DIFFING → REVIEW → PLANNED</small></article>
-                <article class="flow-stage is-gate"><span class="flow-stage-no">10</span><strong>Production gate</strong><small>Code, retry limit, lock, and unlock rules</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">11</span><strong>Import and batch apply</strong><small>Dependency layers applied in sequence</small></article>
-                <article class="flow-stage is-warning"><span class="flow-stage-no">12</span><strong>Failure handling</strong><small>Pause, resume, skip error, or abort</small></article>
-                <article class="flow-stage"><span class="flow-stage-no">13</span><strong>Task completion</strong><small>Success, partial success, or failure audit</small></article>
+              <div class="flow-lane-grid">
+                <article class="flow-stage" style="grid-column:1"><span class="flow-stage-no">01</span><strong>Secure credentials</strong><small>AES-256-GCM storage and masked output</small></article>
+                <article class="flow-stage" style="grid-column:2"><span class="flow-stage-no">02</span><strong>SDK validation</strong><small>Organisation and resource permission checks</small></article>
+                <article class="flow-stage" style="grid-column:4 / span 2"><span class="flow-stage-no">04–05</span><strong>Unify two entry points</strong><small>Manual tasks and scheduled sync share one task model</small></article>
+                <article class="flow-stage" style="grid-column:6"><span class="flow-stage-no">06</span><strong>Resolve dependencies</strong><small>Registry, graph, scope, and Flow YAML scan</small></article>
+                <article class="flow-stage" style="grid-column:7"><span class="flow-stage-no">07</span><strong>Map &amp; render</strong><small>SDK models become Terraform HCL</small></article>
+                <article class="flow-stage" style="grid-column:8"><span class="flow-stage-no">08</span><strong>Execute plan</strong><small>Init, plan, show, timeout, and parse</small></article>
+                <article class="flow-stage" style="grid-column:9"><span class="flow-stage-no">09</span><strong>Advance state</strong><small>CREATED → DIFFING → REVIEW → PLANNED</small></article>
+                <article class="flow-stage is-gate" style="grid-column:10"><span class="flow-stage-no">10</span><strong>Verify &amp; gate</strong><small>Code, retry limit, lock, and unlock rules</small></article>
+                <article class="flow-stage" style="grid-column:11"><span class="flow-stage-no">11</span><strong>Import &amp; apply</strong><small>Terraform imports and layered batch apply</small></article>
+                <article class="flow-stage is-warning" style="grid-column:12"><span class="flow-stage-no">12</span><strong>Recovery control</strong><small>Pause, resume, skip-error, or abort</small></article>
+                <article class="flow-stage" style="grid-column:13"><span class="flow-stage-no">13</span><strong>Close task</strong><small>Success, partial success, failure, and audit</small></article>
+              </div>
+            </div>
+
+            <div class="flow-lane">
+              <div class="flow-lane-title"><strong>Genesys Cloud</strong><span>Source and target organisations</span></div>
+              <div class="flow-lane-grid">
+                <article class="flow-stage" style="grid-column:1"><span class="flow-stage-no">01</span><strong>Authorise</strong><small>Client Credentials and scoped source access</small></article>
+                <article class="flow-stage" style="grid-column:2"><span class="flow-stage-no">02</span><strong>Read source</strong><small>Users, queues, flows, tables, and resources</small></article>
+                <article class="flow-stage" style="grid-column:3"><span class="flow-stage-no">03</span><strong>Preserve baseline</strong><small>Snapshot resource definitions by type and division</small></article>
+                <article class="flow-stage" style="grid-column:7"><span class="flow-stage-no">07</span><strong>Workspace</strong><small>Isolated HCL directory with external credentials</small></article>
+                <article class="flow-stage" style="grid-column:8"><span class="flow-stage-no">08</span><strong>Plan state</strong><small>Terraform plan JSON and state store</small></article>
+                <article class="flow-stage" style="grid-column:11"><span class="flow-stage-no">11</span><strong>Apply target</strong><small>Import, create, and update target resources</small></article>
+                <article class="flow-stage" style="grid-column:13"><span class="flow-stage-no">13</span><strong>Effective result</strong><small>Queues, flows, actions, groups, and users live</small></article>
               </div>
             </div>
           </div>
