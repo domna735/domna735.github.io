@@ -1,103 +1,1097 @@
 <!doctype html>
 <html lang="zh-HK">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Genesys Cloud 完整遷移流程</title>
-    <style>
-      :root { --bg:#0b0f14; --elev:#0f1620; --text:#e6edf3; --muted:#9fb0bf; --border:rgba(230,237,243,.12); --ui:#5ca6c7; --engine:#c19a78; --target:#73a878; --gate:#a78bfa; --warn:#f87171; }
-      * { box-sizing:border-box; }
-      html,body { height:100%; }
-      body { margin:0; overflow:hidden; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Microsoft JhengHei","PingFang HK","Segoe UI",sans-serif; }
-      .topbar { height:78px; display:flex; align-items:flex-end; justify-content:space-between; gap:20px; padding:14px 22px 12px; border-bottom:1px solid var(--border); }
-      .brand { color:var(--muted); font-size:11px; letter-spacing:.16em; }
-      h1 { margin:3px 0 0; font-size:22px; letter-spacing:-.02em; }
-      .subtitle { max-width:480px; margin:0; color:var(--muted); font-size:12px; text-align:right; line-height:1.45; }
-      .rail { height:54px; display:grid; grid-template-columns:repeat(13,minmax(92px,1fr)); margin:0; padding:10px 22px 8px; list-style:none; overflow:auto hidden; border-bottom:1px solid var(--border); }
-      .rail li { min-width:92px; color:var(--muted); font-size:10.5px; border-top:1px solid var(--border); padding-top:6px; }
-      .rail li span { display:block; color:var(--gate); font-family:ui-monospace,monospace; }
-      .viewport { height:calc(100% - 132px); overflow:auto; padding:14px 22px 18px; }
-      .canvas { width:1320px; min-width:100%; }
-      .entry { width:470px; margin:0 auto 12px; display:grid; grid-template-columns:1fr 38px 1fr; align-items:center; gap:8px; }
-      .entry-card { border:1px solid var(--border); border-radius:10px; background:var(--elev); padding:8px 10px; text-align:center; }
-      .entry-card span { display:block; color:var(--muted); font-size:9.5px; letter-spacing:.08em; }
-      .entry-card strong { display:block; font-size:12px; }
-      .entry-card small { color:var(--muted); font-size:10px; }
-      .merge { text-align:center; color:var(--gate); font-size:18px; }
-      .lane { display:grid; grid-template-columns:150px 1fr; margin-bottom:8px; border:1px solid var(--border); border-radius:12px; background:rgba(15,22,32,.86); overflow:hidden; }
-      .lane-label { padding:12px; border-right:1px solid var(--border); }
-      .lane-label strong { display:block; font-size:13px; }
-      .lane-label span { color:var(--muted); font-size:10.5px; }
-      .lane-label i { display:inline-block; width:7px; height:7px; margin-right:7px; background:var(--lane); }
-      .grid { display:grid; grid-template-columns:repeat(13,92px); gap:6px; min-height:145px; padding:8px; }
-      .card { min-height:128px; border:1px solid var(--border); border-top:2px solid var(--lane); border-radius:8px; background:linear-gradient(180deg,rgba(255,255,255,.025),transparent); padding:9px; transition:.16s ease; }
-      .card:hover { transform:translateY(-2px); border-color:color-mix(in srgb,var(--lane) 55%,var(--border)); }
-      .card span { color:var(--lane); font-family:ui-monospace,monospace; font-size:9.5px; }
-      .card strong { display:block; margin:5px 0; font-size:11.5px; line-height:1.25; }
-      .card ul { margin:0; padding-left:13px; color:var(--muted); font-size:9.5px; line-height:1.38; }
-      .card li { margin:3px 0; }
-      .card.merge-card { border-style:dashed; }
-      .card.gate { border-top-color:var(--gate); }
-      .card.warn { border-top-color:var(--warn); }
-    </style>
-  </head>
-  <body>
-    <header class="topbar">
-      <div><div class="brand">EGCS · Genesys Cloud 遷移中心</div><h1>完整遷移流程</h1></div>
-      <p class="subtitle">手動建立任務及定時自動同步共用同一任務模型及執行鏈路。</p>
-    </header>
-    <ol class="rail">
-      <li><span>01</span>環境</li><li><span>02</span>連通性</li><li><span>03</span>快照</li><li><span>04</span>任務</li><li><span>05</span>定時</li><li><span>06</span>依賴</li><li><span>07</span>HCL</li><li><span>08</span>Plan</li><li><span>09</span>審核</li><li><span>10</span>確認</li><li><span>11</span>Apply</li><li><span>12</span>安全閘</li><li><span>13</span>結果</li>
-    </ol>
-    <main class="viewport" aria-label="完整遷移流程圖">
-      <div class="canvas">
-        <div class="entry">
-          <div class="entry-card"><span>入口 A · 手動</span><strong>建立遷移任務</strong><small>需要人工核准差異</small></div>
-          <div class="merge">→</div>
-          <div class="entry-card"><span>入口 B · 定時</span><strong>建立自動同步任務</strong><small>Plan 完成後直接執行</small></div>
-        </div>
-        <section class="lane" style="--lane:var(--ui)">
-          <div class="lane-label"><strong><i></i>EGCS-UI</strong><span>Vue.js · 使用者操作</span></div>
-          <div class="grid">
-            <article class="card" style="grid-column:1"><span>01</span><strong>建立 OAuth 環境</strong><ul><li>環境名稱及 API 網域</li><li>標記生產環境</li></ul></article>
-            <article class="card" style="grid-column:2"><span>02</span><strong>連通性探測</strong><ul><li>Organization ID 核對</li><li>權限及資源數量</li></ul></article>
-            <article class="card" style="grid-column:3"><span>03</span><strong>瀏覽及建立快照</strong><ul><li>23 類資源瀏覽</li><li>Division 級基準快照</li></ul></article>
-            <article class="card" style="grid-column:4"><span>04</span><strong>建立遷移任務</strong><ul><li>選擇資源及執行計劃</li><li>配置 DAG及執行模式</li></ul></article>
-            <article class="card" style="grid-column:5"><span>05</span><strong>設定定時同步</strong><ul><li>週期及環境對</li><li>暫停及重試策略</li></ul></article>
-            <article class="card" style="grid-column:9"><span>09</span><strong>審核差異</strong><ul><li>新增 / 變更 / 刪除欄位</li><li>即時 SSE 終端日誌</li></ul></article>
-            <article class="card gate" style="grid-column:10"><span>10</span><strong>確認遷移</strong><ul><li>核對差異及依賴</li><li>生產環境驗證碼</li></ul></article>
-            <article class="card" style="grid-column:13"><span>13</span><strong>證據及報告</strong><ul><li>CSV及稽核匯出</li><li>DataAction 未同步報告</li></ul></article>
-          </div>
-        </section>
-        <section class="lane" style="--lane:var(--engine)">
-          <div class="lane-label"><strong><i></i>SyncEngine</strong><span>Java · 後端編排</span></div>
-          <div class="grid">
-            <article class="card" style="grid-column:1"><span>01</span><strong>保護 OAuth 憑證</strong><ul><li>AES-256-GCM 加密</li><li>遮蔽回顯及日誌</li></ul></article>
-            <article class="card" style="grid-column:2"><span>02</span><strong>SDK 連通驗證</strong><ul><li>Users / divisions</li><li>23 類資源分頁掃描</li></ul></article>
-            <article class="card merge-card" style="grid-column:4 / span 2"><span>04–05</span><strong>統一兩種入口</strong><ul><li>手動任務停在差異審核</li><li>定時任務直接進入執行鏈路</li></ul></article>
-            <article class="card" style="grid-column:6"><span>06</span><strong>計算依賴閉包</strong><ul><li>ResourceRegistry及資源圖</li><li>Flow YAML 引用掃描</li></ul></article>
-            <article class="card" style="grid-column:7"><span>07</span><strong>映射及生成 HCL</strong><ul><li>SDK 模型轉 Terraform 資源</li><li>建立隔離工作區</li></ul></article>
-            <article class="card" style="grid-column:8"><span>08</span><strong>init → plan → show</strong><ul><li>結構化差異解析</li><li>管理 Terraform state</li></ul></article>
-            <article class="card" style="grid-column:9"><span>09</span><strong>推進狀態機</strong><ul><li>CREATED → DIFFING</li><li>DEPENDENCY_REVIEW → PLANNED</li></ul></article>
-            <article class="card gate" style="grid-column:10"><span>10</span><strong>驗證碼門檻</strong><ul><li>六位驗證碼</li><li>重試上限及鎖定規則</li></ul></article>
-            <article class="card" style="grid-column:11"><span>11</span><strong>Import及批量 Apply</strong><ul><li>Import 已存在資源</li><li>依賴分層逐層 Apply</li></ul></article>
-            <article class="card warn" style="grid-column:12"><span>12</span><strong>暫停及恢復</strong><ul><li>分層待人工核准</li><li>恢復、略過或中止</li></ul></article>
-            <article class="card" style="grid-column:13"><span>13</span><strong>任務收尾</strong><ul><li>成功 / 部分成功 / 失敗</li><li>需要時執行快照回滾</li></ul></article>
-          </div>
-        </section>
-        <section class="lane" style="--lane:var(--target)">
-          <div class="lane-label"><strong><i></i>Genesys Cloud</strong><span>來源及目標組織</span></div>
-          <div class="grid">
-            <article class="card" style="grid-column:1"><span>01</span><strong>授權來源組織</strong><ul><li>Client Credentials</li><li>只讀來源權限</li></ul></article>
-            <article class="card" style="grid-column:2"><span>02</span><strong>讀取來源資源</strong><ul><li>使用者 / Queue / Flow</li><li>Data Table及Action</li></ul></article>
-            <article class="card" style="grid-column:3"><span>03</span><strong>保留還原基準</strong><ul><li>依類型及Division快照</li><li>提供回滾還原點</li></ul></article>
-            <article class="card" style="grid-column:7"><span>07</span><strong>Terraform 工作區</strong><ul><li>每個任務獨立目錄</li><li>憑證透過環境變數注入</li></ul></article>
-            <article class="card" style="grid-column:8"><span>08</span><strong>Plan及State</strong><ul><li>JSON / Text Plan</li><li>Terraform 狀態存放</li></ul></article>
-            <article class="card" style="grid-column:11"><span>11</span><strong>寫入目標組織</strong><ul><li>Create / Update / Import</li><li>分層呈現進度</li></ul></article>
-            <article class="card" style="grid-column:13"><span>13</span><strong>目標環境已生效</strong><ul><li>Queue及Flow 正常運作</li><li>可在管理台核對</li></ul></article>
-          </div>
-        </section>
-      </div>
-    </main>
-  </body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EGCS · 完整遷移流程</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f1f0ea'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='16' text-anchor='middle' fill='%2317191a'%3EE%3C/text%3E%3C/svg%3E">
+<script>
+  if ("scrollRestoration" in history) { history.scrollRestoration = "manual"; }
+</script>
+<style>
+  :root{
+    --paper:#f1f0ea;
+    --card:#fbfaf6;
+    --ink:#17191a;
+    --ink-2:#4c5150;
+    --ink-3:#838883;
+    --ink-4:#b6bab2;
+    --rule:#d3d2c7;
+    --rule-2:#e4e2d8;
+    --seal:#a93b2c;
+
+    --lane-ui:#2e5a6b;
+    --lane-engine:#6a4f3e;
+    --lane-target:#44654a;
+
+    --label-w:9.25rem;
+    --col-w:18.75rem;
+    --gap:3rem;
+  }
+
+  *{box-sizing:border-box}
+  html{font-size:16px}
+  body{
+    height:100vh;
+    margin:0;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Segoe UI","Microsoft YaHei UI","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ============ 报头 ============ */
+  .masthead{
+    flex:none;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:2rem;
+    padding:1.1rem 2rem .95rem;
+    border-bottom:1px solid var(--ink);
+  }
+  .brand{
+    display:block;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:.6875rem;
+    letter-spacing:.2em;
+    color:var(--ink-2);
+  }
+  .masthead h1{
+    margin:.1rem 0 .2rem;
+    font-size:1.75rem;
+    font-weight:600;
+    letter-spacing:-.012em;
+    line-height:1.15;
+  }
+  .masthead p{
+    margin:0;
+    max-width:44rem;
+    font-size:.75rem;
+    line-height:1.5;
+    color:var(--ink-2);
+  }
+
+  .masthead__side{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:.55rem;
+    flex:none;
+    padding-bottom:.15rem;
+  }
+  .legend{
+    display:flex;
+    gap:1.35rem;
+    margin:0;
+    padding:0;
+    list-style:none;
+    font-size:.6875rem;
+    color:var(--ink-2);
+  }
+  .legend li{display:flex;align-items:center;gap:.4rem}
+  .legend i{
+    width:.45rem;height:.45rem;
+    background:var(--c);
+    display:inline-block;
+  }
+  .legend span{color:var(--ink-3);font-size:.625rem}
+
+  .side-row{display:flex;align-items:center;gap:1rem}
+  .hint{
+    font-size:.625rem;
+    letter-spacing:.02em;
+    color:var(--ink-3);
+  }
+  .fs{
+    appearance:none;
+    background:transparent;
+    border:1px solid var(--rule);
+    border-radius:0;
+    padding:.18rem .5rem;
+    font-family:inherit;
+    font-size:.625rem;
+    letter-spacing:.06em;
+    color:var(--ink-2);
+    cursor:pointer;
+    transition:border-color .15s,color .15s;
+  }
+  .fs:hover{border-color:var(--ink-3);color:var(--ink)}
+  .fs:focus-visible{outline:1px solid var(--seal);outline-offset:2px}
+
+  /* ============ 階段轨 ============ */
+  .rail{
+    flex:none;
+    position:relative;
+    padding:.95rem 2rem .45rem;
+    border-bottom:1px solid var(--rule-2);
+  }
+  .rail__line,
+  .rail__fill{
+    position:absolute;
+    left:2rem;
+    top:.6rem;
+    height:1px;
+  }
+  .rail__line{right:2rem;background:var(--rule)}
+  .rail__fill{width:0;background:var(--ink)}
+  .rail__ticks{
+    position:relative;
+    display:flex;
+    margin:0;
+    padding:0;
+    list-style:none;
+  }
+  .tick{
+    flex:1 1 0;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:.08rem;
+    color:var(--ink-3);
+    transition:color .2s;
+  }
+  .tick::before{
+    content:"";
+    position:absolute;
+    top:-.35rem;
+    width:1px;
+    height:.45rem;
+    background:var(--rule);
+  }
+  .tick__no{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:.625rem;
+    letter-spacing:.06em;
+  }
+  .tick__name{
+    font-size:.625rem;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    padding-right:.6rem;
+  }
+  .tick.is-active{color:var(--ink)}
+  .tick.is-active .tick__no{color:var(--seal)}
+  .tick.is-active::before{background:var(--seal);width:2px}
+
+  /* ============ 画布 ============ */
+  .viewport{
+    flex:1;
+    min-height:0;
+    position:relative;
+    overflow-x:auto;
+    overflow-y:hidden;
+    cursor:grab;
+    overscroll-behavior:contain;
+    overflow-anchor:none;
+    scrollbar-width:thin;
+    scrollbar-color:#b9bcb2 transparent;
+  }
+  .viewport:focus-visible{outline:none}
+  .viewport.is-dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
+  .viewport.is-dragging *{cursor:grabbing}
+  .viewport::-webkit-scrollbar{height:9px}
+  .viewport::-webkit-scrollbar-track{background:transparent}
+  .viewport::-webkit-scrollbar-thumb{background:#c3c5bb;border:3px solid var(--paper)}
+  .viewport::-webkit-scrollbar-thumb:hover{background:#a8aba1}
+
+  .canvas{
+    position:relative;
+    width:max-content;
+    padding:1.05rem 2rem .6rem 0;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .wires{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    overflow:visible;
+    pointer-events:none;
+  }
+  .wire{
+    fill:none;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    opacity:.68;
+    transition:opacity .15s,stroke-width .15s;
+  }
+  .wire--chain{stroke-width:1.2}
+  .wire--link{stroke-width:1;stroke-dasharray:4 4;opacity:.5}
+  .wire--auto{stroke-width:1.2;stroke-dasharray:3 5;opacity:.8}
+  .wire--drop{stroke-width:1.2}
+  .wire.is-lit{opacity:1;stroke-width:1.9}
+  .wire-label{
+    font-family:"Segoe UI","Microsoft YaHei UI","Microsoft YaHei",sans-serif;
+    font-size:.5625rem;
+    letter-spacing:.03em;
+    fill:var(--seal);
+  }
+
+  /* ============ 階段表头 ============ */
+  .stage-head{
+    display:flex;
+    position:relative;
+    z-index:3;
+    margin-bottom:.2rem;
+  }
+  .stage-head__label{
+    position:sticky;
+    left:0;
+    z-index:5;
+    flex:0 0 var(--label-w);
+    align-self:stretch;
+    display:flex;
+    align-items:flex-end;
+    padding:0 1rem .5rem 2rem;
+    background:var(--paper);
+    font-size:.5625rem;
+    letter-spacing:.16em;
+    color:var(--ink-4);
+  }
+  .stage-head__label::after,
+  .lane-label::after{
+    content:"";
+    position:absolute;
+    right:-1rem;
+    top:0;
+    bottom:0;
+    width:1rem;
+    background:linear-gradient(90deg,var(--paper),rgba(241,240,234,0));
+    pointer-events:none;
+  }
+  .stage-head__track{
+    display:grid;
+    grid-template-columns:repeat(13,var(--col-w));
+    column-gap:var(--gap);
+    flex:none;
+    border-bottom:1px solid var(--ink);
+  }
+  .stage{
+    display:flex;
+    flex-direction:column;
+    gap:.05rem;
+    padding:.5rem 0 .45rem;
+    position:relative;
+  }
+  .stage__no{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:1.05rem;
+    line-height:1;
+    letter-spacing:.02em;
+    color:var(--ink-4);
+    transition:color .2s;
+  }
+  .stage__name{
+    font-size:.6875rem;
+    line-height:1.3;
+    color:var(--ink-2);
+    white-space:nowrap;
+    transition:color .2s;
+  }
+  .stage.is-active .stage__no{color:var(--seal)}
+  .stage.is-active .stage__name{color:var(--ink)}
+
+  /* ============ 版心与泳道 ============ */
+  .board{position:relative;z-index:1}
+
+  .gridlines{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+  }
+  .gridlines i{
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:1px;
+    background:#c8c6ba;
+  }
+
+  .lanes{position:relative;z-index:1}
+  .lane{
+    display:flex;
+    align-items:stretch;
+    position:relative;
+  }
+  .lane + .lane{margin-top:.85rem}
+  /* 引擎层与目标层之间留出定时任务自动路径的走线走廊 */
+  .lane[data-lane="target"]{margin-top:2.4rem}
+
+  .lane-label{
+    position:sticky;
+    left:0;
+    z-index:5;
+    flex:0 0 var(--label-w);
+    align-self:stretch;
+    display:flex;
+    flex-direction:column;
+    gap:.1rem;
+    padding:.6rem 1rem .5rem 2rem;
+    background:var(--paper);
+  }
+  .lane-label__name{
+    display:flex;
+    align-items:center;
+    gap:.4rem;
+    font-size:.72rem;
+    font-weight:600;
+    line-height:1.25;
+    letter-spacing:.01em;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .lane-label__name i{
+    width:.4rem;height:.4rem;
+    background:var(--lane);
+    display:inline-block;
+    flex:none;
+  }
+  .lane-label__sub{
+    font-family:"Cascadia Mono",Consolas,monospace;
+    font-size:.5625rem;
+    line-height:1.5;
+    color:var(--ink-3);
+    letter-spacing:.01em;
+  }
+
+  .lane-track{
+    display:grid;
+    grid-template-columns:repeat(13,var(--col-w));
+    column-gap:var(--gap);
+    align-items:start;
+    flex:none;
+    padding-top:.35rem;
+  }
+
+  /* ============ 卡片 ============ */
+  .card{
+    position:relative;
+    width:var(--col-w);
+    padding:.7rem .8rem .65rem .85rem;
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:2px;
+    transition:border-color .18s,background-color .18s;
+    animation:enter .35s ease-out both;
+    animation-delay:var(--d,0ms);
+  }
+  .card:hover{
+    border-color:var(--ink-3);
+    background:#fff;
+  }
+  .card__ref{
+    margin:0;
+    font-family:"Cascadia Mono",Consolas,monospace;
+    font-size:.5625rem;
+    line-height:1.4;
+    letter-spacing:.01em;
+    color:var(--ink-3);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .card h3{
+    margin:.28rem 0 .38rem;
+    font-size:.8125rem;
+    font-weight:600;
+    line-height:1.35;
+    letter-spacing:.005em;
+    color:var(--ink);
+  }
+  .card ul{margin:0;padding:0;list-style:none}
+  .card li{
+    position:relative;
+    padding-left:.72rem;
+    margin-bottom:.18rem;
+    font-size:.6875rem;
+    line-height:1.62;
+    color:var(--ink-2);
+  }
+  .card li:last-child{margin-bottom:0}
+  .card li::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:.62em;
+    width:.3rem;
+    height:1px;
+    background:var(--ink-4);
+  }
+  .card li b{color:var(--ink);font-weight:600}
+  .card__tags{
+    margin:.5rem 0 0;
+    font-family:"Cascadia Mono",Consolas,monospace;
+    font-size:.5625rem;
+    line-height:1.4;
+    letter-spacing:.01em;
+    color:var(--ink-3);
+  }
+  .card--span{width:auto}
+
+  .merge-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1.4rem;
+    margin-top:.4rem;
+  }
+  .merge-cell__label{
+    display:block;
+    font-size:.5625rem;
+    letter-spacing:.04em;
+    color:var(--ink-3);
+    margin-bottom:.22rem;
+  }
+  .merge-cell--auto .merge-cell__label{color:var(--seal)}
+  .merge-cell p{
+    margin:0;
+    font-size:.6875rem;
+    line-height:1.62;
+    color:var(--ink-2);
+  }
+  .merge-cell p b{color:var(--ink);font-weight:600}
+  .card__note{
+    margin:.55rem 0 0;
+    padding-top:.42rem;
+    border-top:1px solid var(--rule-2);
+    font-family:"Cascadia Mono",Consolas,monospace;
+    font-size:.5625rem;
+    line-height:1.5;
+    color:var(--ink-3);
+  }
+
+  .card--seal .card__ref{color:var(--seal)}
+
+  @keyframes enter{
+    from{opacity:0;transform:translateY(4px)}
+    to{opacity:1;transform:none}
+  }
+
+  /* ============ 脚注 ============ */
+  .colophon{
+    flex:none;
+    display:flex;
+    flex-wrap:wrap;
+    gap:1.4rem;
+    padding:.42rem 2rem;
+    border-top:1px solid var(--rule-2);
+    font-size:.5625rem;
+    line-height:1.4;
+    letter-spacing:.02em;
+    color:var(--ink-3);
+  }
+  .colophon span + span::before{
+    content:"·";
+    margin-right:1.4rem;
+    color:var(--ink-4);
+  }
+
+  @media (max-width:1180px){
+    .legend{display:none}
+    .masthead h1{font-size:1.45rem}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <span class="brand">EGCS · GENESYS CLOUD 遷移中心</span>
+    <h1>完整遷移流程</h1>
+    <p>兩個入口共用同一條執行鏈路：手動任務需要人工確認，定時任務則會自動執行。</p>
+  </div>
+  <div class="masthead__side">
+    <ul class="legend">
+      <li style="--c:var(--lane-ui)"><i></i>使用者操作<span>EGCS-UI</span></li>
+      <li style="--c:var(--lane-engine)"><i></i>後端引擎<span>SyncEngine / Terraform</span></li>
+      <li style="--c:var(--lane-target)"><i></i>Genesys Cloud<span>Org / 工作區</span></li>
+    </ul>
+    <div class="side-row">
+      <span class="hint">滾輪左右瀏覽 · 拖曳移動 · 方向鍵</span>
+      <button class="fs" id="fsBtn" type="button">全螢幕</button>
+    </div>
+  </div>
+</header>
+
+<nav class="rail" aria-label="階段進度">
+  <div class="rail__line"></div>
+  <div class="rail__fill" id="railFill"></div>
+  <ol class="rail__ticks" id="railTicks"></ol>
+</nav>
+
+<main class="viewport" id="viewport" tabindex="0" role="region" aria-label="EGCS 完整遷移流程，可橫向捲動檢視">
+  <div class="canvas" id="canvas">
+    <svg class="wires" id="wires" xmlns="http://www.w3.org/2000/svg"></svg>
+
+    <div class="stage-head">
+      <div class="stage-head__label">階段</div>
+      <div class="stage-head__track" id="stageHead"></div>
+    </div>
+
+    <div class="board">
+      <div class="gridlines" aria-hidden="true" id="gridlines"></div>
+      <div class="lanes" id="lanes"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="colophon">
+  <span>Mock 測試不需真實 Genesys 憑證</span>
+  <span>Terraform 應憑證僅透過 GENESYSCLOUD_* 環境變數注入</span>
+  <span>生產目標需六位驗證碼，有效期五分鐘，連續錯誤五次後鎖定</span>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var LANES = [
+    { key: "ui", name: "使用者操作", sub: "EGCS-UI · Vue 3", color: "#2e5a6b" },
+    { key: "engine", name: "後端引擎", sub: "egcs-service · SyncEngine", color: "#6a4f3e" },
+    { key: "target", name: "Genesys Cloud", sub: "目標 Org · 工作區", color: "#44654a" }
+  ];
+
+  var STAGES = [
+    { key: "env", no: "01", name: "環境 · OAuth" },
+    { key: "conn", no: "02", name: "連通性測試" },
+    { key: "res", no: "03", name: "資源 · 快照" },
+    { key: "task", no: "04", name: "建立遷移任務" },
+    { key: "timer", no: "05", name: "設定定時同步" },
+    { key: "closure", no: "06", name: "依賴閉包" },
+    { key: "hcl", no: "07", name: "生成 HCL" },
+    { key: "plan", no: "08", name: "Plan · 解析" },
+    { key: "review", no: "09", name: "依賴 / 差異" },
+    { key: "confirm", no: "10", name: "確認 · 驗證碼" },
+    { key: "apply", no: "11", name: "執行 · Apply" },
+    { key: "guard", no: "12", name: "暫停 · 分層確認" },
+    { key: "result", no: "13", name: "結果呈現" }
+  ];
+
+  var CARDS = [
+    { id: "ui-env", stage: "env", lane: "ui", kicker: "migration/env · 環境", title: "建立 OAuth 客戶端", points: ["輸入 envKey、API 網域、Organization ID、Client ID及Secret", "標記生產環境以啟用驗證門檻", "編輯時將Secret留空可保留原有數值"], chips: ["Client Credentials", "AES-256-GCM"] },
+    { id: "eng-env", stage: "env", lane: "engine", kicker: "MigrationEnvServiceImpl", title: "加密憑證儲存", points: ["Secret以AES-256-GCM加密儲存", "介面及日誌只回傳遮蔽後的Client ID", "環境名稱及生產標記會隨環境安全下發"], chips: ["SensitiveCrypto"] },
+    { id: "tgt-auth", stage: "env", lane: "target", kicker: "Genesys Cloud · 來源Org", title: "授權來源組織", points: ["使用Client Credentials換取存取權杖", "要求具備待遷移資源的讀取權限"], chips: ["來源環境"] },
+    { id: "ui-conn", stage: "conn", lane: "ui", kicker: "環境卡片 · 連通性", title: "連通性探測", points: ["驗證連通性及Organization ID", "回報權限狀態及資源數量", "將失敗原因直接顯示於環境卡片"], chips: ["MigrationEnvController"] },
+    { id: "eng-sdk", stage: "conn", lane: "engine", kicker: "platform-client-v2", title: "讀取來源組織", points: ["讀取/users/me及Division清單", "分頁統計23類資源數量", "讀取失敗時將環境標記為不可用"], chips: ["Genesys SDK"] },
+    { id: "tgt-live", stage: "conn", lane: "target", kicker: "來源Org · 即時資料", title: "讀取來源資源", points: ["讀取使用者、Queue、Flow及Data Table等資源", "只讀，不會寫回來源環境"], chips: ["read-only"] },
+    { id: "ui-res", stage: "res", lane: "ui", kicker: "migration/resource · snapshot", title: "瀏覽資源及建立快照", points: ["瀏覽23類資源及詳細資料", "按類型/Division或選定資源建立快照", "快照可作為後續回滾的還原基準"], chips: ["資源索引", "快照基準"] },
+    { id: "eng-read", stage: "res", lane: "engine", kicker: "Genesys資源服務", title: "資源讀取及快照", points: ["共用資源控制器的路由及權限邏輯", "持久化資源索引的增量更新", "MigrationSnapshotService建立快照批次"], chips: ["資源註冊表"] },
+    { id: "tgt-snap", stage: "res", lane: "target", kicker: "基準快照", title: "可還原的資源定義", points: ["依資源類型及Division固定定義", "回滾時以此基準還原目標環境"], chips: ["還原點"] },
+    { id: "ui-task", stage: "task", lane: "ui", kicker: "入口A · 任務中心", title: "建立遷移任務", points: ["三步：選擇資源 → 設定執行計劃 → 確認", "執行計劃包含DAG順序、模式、依賴及預估時間", "提交只建立任務；<b>執行前須人工確認差異</b>"], chips: ["MIGRATION", "MERGE", "ROLLBACK", "SNAPSHOT_ONLY"] },
+    { id: "ui-timer", stage: "timer", lane: "ui", kicker: "入口B · 定時同步", title: "設定定時執行", points: ["選擇環境對、週期及執行模式", "失敗時自動重試並支援暫停保護", "到點時建立並執行任務，<b>無需人工審批</b>"], chips: ["MigrationSyncTimer", "定時排程"] },
+    { id: "eng-merge", stage: "task", lane: "engine", span: 2, kicker: "POST /migration/sync/tasks · MigrationSyncTimer", title: "兩個入口，共用同一任務模型", body: '<div class="merge-grid"><div class="merge-cell"><span class="merge-cell__label">手動 · 建立遷移任務</span><p>精靈提交後任務儲存為<b>CREATED</b>，並在差異頁等待人工核准。</p></div><div class="merge-cell merge-cell--auto"><span class="merge-cell__label">定時 · 自動同步</span><p>排程器建立並執行任務，跳過人工核准並直接進入執行鏈路。</p></div></div><p class="card__note">每個目標環境只允許一組未完成任務；mock或Terraform由migration.integration.mode決定</p>' },
+    { id: "eng-closure", stage: "closure", lane: "engine", kicker: "crossorg · beginDiff", title: "計算依賴閉包", points: ["匯出來源資源並計算跨Org依賴閉包", "使用ResourceRegistry、DependencyGraph及ScopeResolver", "掃描Flow的Archy YAML引用"], chips: ["FlowYamlReferenceScanner"] },
+    { id: "eng-hcl", stage: "hcl", lane: "engine", kicker: "mapping → render → HCL", title: "映射SDK資源至Terraform", points: ["Resource Mapper將SDK模型轉為TerraformResource", "Renderer及TerraformHclGenerator產生工作區HCL", "純文字生成不涉及I/O，便於單元測試"], chips: ["TerraformHclGenerator", "FlowYamlRewriter"] },
+    { id: "tgt-hcl", stage: "hcl", lane: "target", kicker: "遷移工作區", title: "隔離HCL工作區", points: ["每個任務使用獨立工作目錄", "憑證不會寫入HCL，只透過環境變數注入"], chips: [".tf檔案"] },
+    { id: "eng-plan", stage: "plan", lane: "engine", kicker: "TerraformExecutor", title: "init → plan → show", points: ["執行子進程，控制逾時並串流stdout/stderr", "憑證只透過GENESYSCLOUD_*環境變數注入", "將Terraform Plan解析為結構化差異"], chips: ["TerraformPlanParser"] },
+    { id: "tgt-plan", stage: "plan", lane: "target", kicker: "Terraform", title: "Plan產物及State", points: ["產生JSON或文字格式的Plan", "由TerraformStateStore管理State"], chips: [".tfstate"] },
+    { id: "ui-diff", stage: "review", lane: "ui", kicker: "任務詳情 · 差異頁", title: "審核依賴及差異", points: ["欄位差異：+新增 / ~變更 / -刪除，依afterSeq增量輪詢", "重新掃描或逐項處理依賴樹", "透過SSE即時跟隨終端日誌並依lineNo去重"], chips: ["TaskLogPusher", "SSE", "afterSeq"] },
+    { id: "eng-state", stage: "review", lane: "engine", kicker: "TaskStatus", title: "推進任務狀態", points: ["CREATED → DIFFING → DEPENDENCY_REVIEW → PLANNED", "依賴缺失、模糊或循環時停在待確認", "終態及取消規則由狀態機直接執行"], chips: ["DEPENDENCY_REVIEW", "PLANNED"] },
+    { id: "ui-confirm", stage: "confirm", lane: "ui", kicker: "差異頁 · 遷移確認", title: "確認並提交", points: ["核對差異及依賴決策後確認", "生產目標需輸入六位驗證碼"], chips: ["有效期五分鐘", "連錯五次後鎖定"] },
+    { id: "eng-gate", stage: "confirm", lane: "engine", kicker: "POST /tasks/{id}/confirm", title: "驗證碼門檻", points: ["PLANNED → WAITING_CODE → APPLYING", "非生產環境直接由PLANNED進入APPLYING", "任務鎖定後需解鎖才可重試"], chips: ["MigrationTaskController"] },
+    { id: "eng-apply", stage: "apply", lane: "engine", kicker: "beginApply", title: "Apply執行管線", points: ["TerraformImportPlanner匯入目標中已存在的資源", "TerraformBatchPlanner依依賴分層逐層Apply", "TerraformApplyParser回寫任務明細及差異變更"], chips: ["import → batch → apply"] },
+    { id: "eng-guard", stage: "guard", lane: "engine", kicker: "分層確認 / 失敗策略", title: "暫停及人工介入", points: ["分層確認模式停在LAYER_PENDING_REVIEW", "failPolicy = AUTO_PAUSE → AUTO_PAUSED", "可Resume或Skip-error繼續執行"], chips: ["LAYER_PENDING_REVIEW", "AUTO_PAUSED"], tone: "seal" },
+    { id: "tgt-write", stage: "apply", lane: "target", kicker: "目標Org", title: "寫入Genesys Cloud", points: ["依分層執行Import、建立及更新", "每一步都會產生一筆任務明細"], chips: ["apply"] },
+    { id: "ui-report", stage: "result", lane: "ui", kicker: "任務詳情 · 稽核 · Dashboard", title: "結果及證據", points: ["進度、明細及日誌下載", "匯出CSV明細、使用者對比及未同步DataAction報告", "稽核日誌保留180天並可匯出"], chips: ["報告匯出", "稽核查詢"] },
+    { id: "eng-final", stage: "result", lane: "engine", kicker: "終態及旁路", title: "任務收尾", points: ["終態：SUCCESS / PARTIAL_SUCCESS / FAILED", "快照回滾會略過DIFFING/PLANNED並直接進入APPLYING", "稽核紀錄保留完整操作軌跡"], chips: ["MigrationSyncTimer", "稽核"] },
+    { id: "tgt-final", stage: "result", lane: "target", kicker: "資料呈現", title: "目標環境已更新", points: ["Queue、Flow、Data Action、Group及User已生效", "可直接在Genesys Cloud管理主控台核對"], chips: ["目標Org"] }
+  ];
+
+  var EDGES = [
+    ["ui-env", "eng-env", "chain"],
+    ["eng-env", "tgt-auth", "link"],
+    ["tgt-live", "eng-sdk", "link"],
+    ["ui-conn", "eng-sdk", "chain"],
+    ["ui-res", "eng-read", "chain"],
+    ["ui-task", "eng-merge", "drop"],
+    ["ui-timer", "eng-merge", "drop"],
+    ["eng-hcl", "tgt-hcl", "link"],
+    ["eng-plan", "ui-diff", "chain"],
+    ["eng-plan", "tgt-plan", "link"],
+    ["ui-confirm", "eng-gate", "chain"],
+    ["eng-plan", "eng-apply", "auto"]
+  ];
+
+  /* 两条入口是并列关系，不串成链 */
+  var SKIP_CHAIN = {
+    "ui-task>ui-timer": true,
+    "ui-timer>ui-diff": true
+  };
+
+  var stageIndex = {};
+  STAGES.forEach(function (s, i) { stageIndex[s.key] = i; });
+
+  var laneColor = {};
+  LANES.forEach(function (l) { laneColor[l.key] = l.color; });
+
+  var viewport = document.getElementById("viewport");
+  var canvas = document.getElementById("canvas");
+  var svg = document.getElementById("wires");
+  var lanesEl = document.getElementById("lanes");
+  var stageHead = document.getElementById("stageHead");
+  var gridlines = document.getElementById("gridlines");
+  var railTicks = document.getElementById("railTicks");
+  var railFill = document.getElementById("railFill");
+  var masthead = document.querySelector(".masthead");
+  var rail = document.querySelector(".rail");
+  var colophon = document.querySelector(".colophon");
+
+  /* ---------- 階段表头 ---------- */
+  stageHead.innerHTML = STAGES.map(function (s) {
+    return '<div class="stage" data-key="' + s.key + '">' +
+             '<span class="stage__no">' + s.no + "</span>" +
+             '<span class="stage__name">' + s.name + "</span>" +
+           "</div>";
+  }).join("");
+
+  /* ---------- 版心纵线 ---------- */
+  gridlines.innerHTML = STAGES.map(function () { return "<i></i>"; }).join("");
+
+  /* ---------- 进度轨 ---------- */
+  railTicks.innerHTML = STAGES.map(function (s) {
+    return '<li class="tick" data-index="' + stageIndex[s.key] + '">' +
+             '<span class="tick__no">' + s.no + "</span>" +
+             '<span class="tick__name">' + s.name + "</span>" +
+           "</li>";
+  }).join("");
+
+  /* ---------- 泳道与卡片 ---------- */
+  var cardOrder = 0;
+
+  function escapeAttr(s) { return String(s).replace(/"/g, "&quot;"); }
+
+  lanesEl.innerHTML = LANES.map(function (lane) {
+    var cards = CARDS.filter(function (c) { return c.lane === lane.key; });
+
+    var cells = cards.map(function (c) {
+      var col = stageIndex[c.stage] + 1;
+      var delay = Math.min(cardOrder * 18, 460);
+      cardOrder++;
+      var tags = (c.chips || []).join(" · ");
+      var points = (c.points || []).map(function (p) { return "<li>" + p + "</li>"; }).join("");
+      var span = c.span || 1;
+      var colRule = span > 1 · col + " / span " + span : String(col);
+      return '<article class="card' + (span > 1 · " card--span" : "") +
+             (c.tone === "seal" · " card--seal" : "") + '"' +
+             ' id="' + c.id + '" data-id="' + escapeAttr(c.id) + '"' +
+             ' style="grid-column:' + colRule + ';grid-row:1;--d:' + delay + 'ms">' +
+               '<p class="card__ref">' + c.kicker + "</p>" +
+               "<h3>" + c.title + "</h3>" +
+               (c.body · c.body : "<ul>" + points + "</ul>") +
+               (!c.body && tags · '<p class="card__tags">' + tags + "</p>" : "") +
+             "</article>";
+    }).join("");
+
+    return '<section class="lane" data-lane="' + lane.key + '">' +
+             '<div class="lane-label">' +
+               '<span class="lane-label__name" style="--lane:' + lane.color + '"><i></i>' + lane.name + "</span>" +
+               '<span class="lane-label__sub">' + lane.sub + "</span>" +
+             "</div>" +
+             '<div class="lane-track">' + cells + "</div>" +
+           "</section>";
+  }).join("");
+
+  /* ---------- 连线 ---------- */
+  var NS = "http://www.w3.org/2000/svg";
+
+  (function buildDefs() {
+    var defs = document.createElementNS(NS, "defs");
+    LANES.concat([{ key: "neutral", color: "#8a8f88" }, { key: "seal", color: "#a93b2c" }]).forEach(function (l) {
+      var m = document.createElementNS(NS, "marker");
+      m.setAttribute("id", "arrow-" + l.key);
+      m.setAttribute("viewBox", "0 0 8 8");
+      m.setAttribute("refX", "7");
+      m.setAttribute("refY", "4");
+      m.setAttribute("markerWidth", "6");
+      m.setAttribute("markerHeight", "6");
+      m.setAttribute("orient", "auto");
+      var p = document.createElementNS(NS, "path");
+      p.setAttribute("d", "M0.6,1 L7.2,4 L0.6,7 Z");
+      p.setAttribute("fill", l.color);
+      m.appendChild(p);
+      defs.appendChild(m);
+    });
+    svg.appendChild(defs);
+  })();
+
+  var wireEls = [];
+
+  function cardBox(el) {
+    var r = el.getBoundingClientRect();
+    var c = canvas.getBoundingClientRect();
+    return {
+      l: r.left - c.left,
+      r: r.right - c.left,
+      t: r.top - c.top,
+      b: r.bottom - c.top,
+      cx: (r.left + r.right) / 2 - c.left,
+      cy: (r.top + r.bottom) / 2 - c.top
+    };
+  }
+
+  function orthoPath(x1, y1, x2, y2) {
+    var r = 9;
+    if (Math.abs(y2 - y1) < 1) {
+      return "M" + x1 + "," + y1 + " L" + x2 + "," + y1;
+    }
+    var mid = (x1 + x2) / 2;
+    if (Math.abs(mid - x1) < r + 2 || Math.abs(mid - x2) < r + 2) {
+      return "M" + x1 + "," + y1 + " L" + x2 + "," + y2;
+    }
+    var s = y2 > y1 · 1 : -1;
+    return "M" + x1 + "," + y1 +
+           " H" + (mid - r) +
+           " Q" + mid + "," + y1 + " " + mid + "," + (y1 + s * r) +
+           " V" + (y2 - s * r) +
+           " Q" + mid + "," + y2 + " " + (mid + r) + "," + y2 +
+           " H" + x2;
+  }
+
+  function pathBetween(a, b) {
+    if (Math.abs(a.cx - b.cx) < 20) {
+      if (b.cy > a.cy) { return "M" + a.cx + "," + (a.b + 2) + " L" + b.cx + "," + (b.t - 5); }
+      return "M" + a.cx + "," + (a.t - 2) + " L" + b.cx + "," + (b.b + 5);
+    }
+    if (b.cx > a.cx) {
+      return orthoPath(a.r + 2, a.cy, b.l - 5, b.cy);
+    }
+    return orthoPath(a.l - 2, a.cy, b.r + 5, b.cy);
+  }
+
+  function drawWires() {
+    Array.prototype.slice.call(svg.querySelectorAll("path.wire, text.wire-label")).forEach(function (p) {
+      p.parentNode.removeChild(p);
+    });
+    wireEls = [];
+
+    var pairs = [];
+
+    LANES.forEach(function (lane) {
+      var track = document.querySelector('.lane[data-lane="' + lane.key + '"] .lane-track');
+      var cards = Array.prototype.slice.call(track.querySelectorAll(".card"));
+      for (var i = 0; i < cards.length - 1; i++) {
+        if (SKIP_CHAIN[cards[i].dataset.id + ">" + cards[i + 1].dataset.id]) { continue; }
+        pairs.push({ from: cards[i], to: cards[i + 1], kind: "chain", color: lane.color, key: lane.key });
+      }
+    });
+
+    EDGES.forEach(function (e) {
+      var from = document.getElementById(e[0]);
+      var to = document.getElementById(e[1]);
+      if (!from || !to) { return; }
+      var lane = from.closest(".lane").dataset.lane;
+      var auto = e[2] === "auto";
+      pairs.push({
+        from: from,
+        to: to,
+        kind: e[2],
+        mode: e[2],
+        color: auto · "#a93b2c" : laneColor[lane],
+        key: auto · "seal" : lane
+      });
+    });
+
+    pairs.forEach(function (p) {
+      var a = cardBox(p.from);
+      var b = cardBox(p.to);
+      var d;
+      if (p.mode === "drop") {
+        d = "M" + a.cx + "," + (a.b + 3) + " L" + a.cx + "," + (b.t - 6);
+      } else if (p.mode === "auto") {
+        d = autoPath(a, b);
+      } else {
+        d = pathBetween(a, b);
+      }
+      var path = document.createElementNS(NS, "path");
+      path.setAttribute("d", d);
+      path.setAttribute("class", "wire wire--" + p.kind);
+      path.setAttribute("stroke", p.color);
+      path.setAttribute("marker-end", "url(#arrow-" + p.key + ")");
+      path.dataset.from = p.from.dataset.id;
+      path.dataset.to = p.to.dataset.id;
+      svg.appendChild(path);
+      wireEls.push(path);
+      if (p.mode === "auto") { addAutoLabel(a, b); }
+    });
+  }
+
+  var rootFs = 16;
+
+  function autoPath(a, b) {
+    var y = Math.max(a.b, b.b) + rootFs * 1.2;
+    var s = b.cx > a.cx · 1 : -1;
+    var r = 8;
+    return "M" + a.cx + "," + (a.b + 3) +
+           " V" + (y - r) +
+           " Q" + a.cx + "," + y + " " + (a.cx + s * r) + "," + y +
+           " H" + (b.cx - s * r) +
+           " Q" + b.cx + "," + y + " " + b.cx + "," + (y - r) +
+           " V" + (b.b + 6);
+  }
+
+  function addAutoLabel(a, b) {
+    var y = Math.max(a.b, b.b) + rootFs * 1.2;
+    var t = document.createElementNS(NS, "text");
+    t.setAttribute("x", (a.cx + b.cx) / 2);
+    t.setAttribute("y", y - rootFs * 0.42);
+    t.setAttribute("text-anchor", "middle");
+    t.setAttribute("class", "wire-label");
+    t.textContent = "定時任務：Plan 完成後自動確認，跳過依賴審核及驗證碼";
+    svg.appendChild(t);
+  }
+
+  function sizeSvg() {
+    svg.setAttribute("width", canvas.offsetWidth);
+    svg.setAttribute("height", canvas.offsetHeight);
+    svg.setAttribute("viewBox", "0 0 " + canvas.offsetWidth + " " + canvas.offsetHeight);
+  }
+
+  /* ---------- 悬停高亮 ---------- */
+  Array.prototype.slice.call(document.querySelectorAll(".card")).forEach(function (card) {
+    var id = card.dataset.id;
+    card.addEventListener("mouseenter", function () {
+      wireEls.forEach(function (w) {
+        if (w.dataset.from === id || w.dataset.to === id) { w.classList.add("is-lit"); }
+      });
+      card.style.zIndex = "4";
+    });
+    card.addEventListener("mouseleave", function () {
+      wireEls.forEach(function (w) { w.classList.remove("is-lit"); });
+      card.style.zIndex = "";
+    });
+  });
+
+  /* ---------- 按视口高度等比缩放 ---------- */
+  var scaleK = 1;
+
+  function fit() {
+    var root = document.documentElement;
+    root.style.fontSize = "16px";
+
+    var chrome = masthead.offsetHeight + rail.offsetHeight + colophon.offsetHeight;
+    var content = canvas.offsetHeight;
+    if (!content) { return; }
+
+    var k = (window.innerHeight - 12) / (chrome + content);
+    k = Math.max(0.55, Math.min(2.25, k));
+    scaleK = k;
+    root.style.fontSize = (16 * k).toFixed(3) + "px";
+  }
+
+  /* ---------- 度量与重绘 ---------- */
+  var headCells = Array.prototype.slice.call(stageHead.querySelectorAll(".stage"));
+  var tickEls = Array.prototype.slice.call(railTicks.querySelectorAll(".tick"));
+  var stageCenters = [];
+  var labelW = 0;
+
+  var gridEls = Array.prototype.slice.call(gridlines.querySelectorAll("i"));
+
+  function relayout() {
+    rootFs = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    labelW = document.querySelector(".stage-head__label").getBoundingClientRect().width;
+    stageCenters = headCells.map(function (el) {
+      return el.offsetLeft + el.offsetWidth / 2;
+    });
+
+    var gap = headCells.length > 1
+      · headCells[1].offsetLeft - (headCells[0].offsetLeft + headCells[0].offsetWidth)
+      : 0;
+
+    gridEls.forEach(function (el, i) {
+      var cell = headCells[i];
+      if (!cell) { return; }
+      el.style.left = (cell.offsetLeft + cell.offsetWidth + gap / 2) + "px";
+    });
+
+    sizeSvg();
+    drawWires();
+  }
+
+  var firstPaint = true;
+
+  function refresh() {
+    fit();
+    relayout();
+    if (firstPaint) {
+      firstPaint = false;
+      viewport.scrollLeft = 0;
+      targetX = 0;
+      currentX = 0;
+    }
+    syncRail();
+  }
+
+  /* ---------- 横向滚轮 ---------- */
+  var targetX = 0;
+  var currentX = 0;
+  var rafId = null;
+  var animating = false;
+
+  function step() {
+    currentX += (targetX - currentX) * 0.24;
+    if (Math.abs(targetX - currentX) < 0.6) {
+      currentX = targetX;
+      viewport.scrollLeft = currentX;
+      rafId = null;
+      animating = false;
+      return;
+    }
+    viewport.scrollLeft = currentX;
+    rafId = requestAnimationFrame(step);
+  }
+
+  viewport.addEventListener("wheel", function (e) {
+    var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) · e.deltaX : e.deltaY;
+    if (!d) { return; }
+    e.preventDefault();
+    var max = viewport.scrollWidth - viewport.clientWidth;
+    targetX = Math.max(0, Math.min(max, targetX + d * scaleK));
+    animating = true;
+    if (rafId === null) { rafId = requestAnimationFrame(step); }
+  }, { passive: false });
+
+  /* ---------- 拖拽平移 ---------- */
+  var dragging = false;
+  var startX = 0;
+  var startLeft = 0;
+
+  viewport.addEventListener("pointerdown", function (e) {
+    if (e.button !== 0) { return; }
+    dragging = true;
+    startX = e.clientX;
+    startLeft = viewport.scrollLeft;
+    viewport.classList.add("is-dragging");
+  });
+
+  window.addEventListener("pointermove", function (e) {
+    if (!dragging) { return; }
+    var dx = e.clientX - startX;
+    if (Math.abs(dx) > 2 && !animating) {
+      viewport.scrollLeft = startLeft - dx;
+      targetX = viewport.scrollLeft;
+      currentX = targetX;
+    }
+  });
+
+  window.addEventListener("pointerup", function () {
+    dragging = false;
+    viewport.classList.remove("is-dragging");
+  });
+
+  /* ---------- 键盘 ---------- */
+  viewport.addEventListener("keydown", function (e) {
+    var delta = 0;
+    if (e.key === "ArrowRight") { delta = 1; }
+    else if (e.key === "ArrowLeft") { delta = -1; }
+    else if (e.key === "Home") { delta = -1e6; }
+    else if (e.key === "End") { delta = 1e6; }
+    if (!delta) { return; }
+    e.preventDefault();
+    var max = viewport.scrollWidth - viewport.clientWidth;
+    var stepPx = Math.abs(delta) > 1 · 1e7 : viewport.clientWidth * 0.24;
+    targetX = Math.max(0, Math.min(max, viewport.scrollLeft + delta * stepPx));
+    animating = true;
+    if (rafId === null) { rafId = requestAnimationFrame(step); }
+  });
+
+  /* ---------- 进度与当前階段 ---------- */
+  var rafPending = false;
+
+  function syncRail() {
+    rafPending = false;
+    var max = viewport.scrollWidth - viewport.clientWidth;
+    var ratio = max > 0 · viewport.scrollLeft / max : 0;
+    var lineW = document.querySelector(".rail__line").getBoundingClientRect().width;
+    railFill.style.width = (ratio * lineW) + "px";
+
+    var probe = viewport.scrollLeft + labelW + (viewport.clientWidth - labelW) * 0.32;
+    var idx = 0;
+    for (var i = 0; i < stageCenters.length; i++) {
+      if (probe >= stageCenters[i]) { idx = i; }
+    }
+    headCells.forEach(function (el, i) { el.classList.toggle("is-active", i === idx); });
+    tickEls.forEach(function (el, i) { el.classList.toggle("is-active", i === idx); });
+  }
+
+  viewport.addEventListener("scroll", function () {
+    if (!animating && !dragging) {
+      targetX = viewport.scrollLeft;
+      currentX = targetX;
+    }
+    if (!rafPending) {
+      rafPending = true;
+      requestAnimationFrame(syncRail);
+    }
+  }, { passive: true });
+
+  /* ---------- 全屏 ---------- */
+  document.getElementById("fsBtn").addEventListener("click", function () {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+      return;
+    }
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen();
+    }
+  });
+
+  /* ---------- 尺寸变化 ---------- */
+  var resizeTimer = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(refresh, 120);
+  });
+
+  if ("scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
+  }
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      refresh();
+      resetStart();
+    });
+  }
+
+  var userTouched = false;
+  function markTouched() { userTouched = true; }
+  viewport.addEventListener("wheel", markTouched, { passive: true });
+  viewport.addEventListener("pointerdown", markTouched);
+  viewport.addEventListener("keydown", markTouched);
+
+  function resetStart() {
+    if (userTouched) { return; }
+    viewport.scrollLeft = 0;
+    targetX = 0;
+    currentX = 0;
+  }
+
+  /* 浏览器会在加载后对嵌套滚动容器做一次平滑的位置恢复，
+     这里在开局 3 秒内守门，把视口钉在起点；用户一操作立刻让位。 */
+  var guardUntil = performance.now() + 3000;
+
+  function guardStart() {
+    if (userTouched) { return; }
+    if (viewport.scrollLeft !== 0) { resetStart(); }
+    if (performance.now() < guardUntil) { requestAnimationFrame(guardStart); }
+  }
+
+  refresh();
+  viewport.focus({ preventScroll: true });
+  window.addEventListener("load", resetStart);
+  window.addEventListener("pageshow", resetStart);
+  requestAnimationFrame(guardStart);
+})();
+</script>
+</body>
 </html>

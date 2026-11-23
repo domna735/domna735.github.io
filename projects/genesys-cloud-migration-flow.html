@@ -1,103 +1,1097 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Genesys Cloud migration full flow</title>
-    <style>
-      :root { --bg:#0b0f14; --elev:#0f1620; --text:#e6edf3; --muted:#9fb0bf; --border:rgba(230,237,243,.12); --ui:#5ca6c7; --engine:#c19a78; --target:#73a878; --gate:#a78bfa; --warn:#f87171; }
-      * { box-sizing:border-box; }
-      html,body { height:100%; }
-      body { margin:0; overflow:hidden; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
-      .topbar { height:78px; display:flex; align-items:flex-end; justify-content:space-between; gap:20px; padding:14px 22px 12px; border-bottom:1px solid var(--border); }
-      .brand { color:var(--muted); font-size:11px; letter-spacing:.16em; text-transform:uppercase; }
-      h1 { margin:3px 0 0; font-size:22px; letter-spacing:-.02em; }
-      .subtitle { max-width:480px; margin:0; color:var(--muted); font-size:12px; text-align:right; line-height:1.45; }
-      .rail { height:54px; display:grid; grid-template-columns:repeat(13,minmax(92px,1fr)); margin:0; padding:10px 22px 8px; list-style:none; overflow:auto hidden; border-bottom:1px solid var(--border); }
-      .rail li { min-width:92px; color:var(--muted); font-size:10.5px; border-top:1px solid var(--border); padding-top:6px; }
-      .rail li span { display:block; color:var(--gate); font-family:ui-monospace,monospace; }
-      .viewport { height:calc(100% - 132px); overflow:auto; padding:14px 22px 18px; }
-      .canvas { width:1320px; min-width:100%; }
-      .entry { width:470px; margin:0 auto 12px; display:grid; grid-template-columns:1fr 38px 1fr; align-items:center; gap:8px; }
-      .entry-card { border:1px solid var(--border); border-radius:10px; background:var(--elev); padding:8px 10px; text-align:center; }
-      .entry-card span { display:block; color:var(--muted); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; }
-      .entry-card strong { display:block; font-size:12px; }
-      .entry-card small { color:var(--muted); font-size:10px; }
-      .merge { text-align:center; color:var(--gate); font-size:18px; }
-      .lane { display:grid; grid-template-columns:150px 1fr; margin-bottom:8px; border:1px solid var(--border); border-radius:12px; background:rgba(15,22,32,.86); overflow:hidden; }
-      .lane-label { padding:12px; border-right:1px solid var(--border); }
-      .lane-label strong { display:block; font-size:13px; }
-      .lane-label span { color:var(--muted); font-size:10.5px; }
-      .lane-label i { display:inline-block; width:7px; height:7px; margin-right:7px; background:var(--lane); }
-      .grid { display:grid; grid-template-columns:repeat(13,92px); gap:6px; min-height:145px; padding:8px; }
-      .card { min-height:128px; border:1px solid var(--border); border-top:2px solid var(--lane); border-radius:8px; background:linear-gradient(180deg,rgba(255,255,255,.025),transparent); padding:9px; transition:.16s ease; }
-      .card:hover { transform:translateY(-2px); border-color:color-mix(in srgb,var(--lane) 55%,var(--border)); }
-      .card span { color:var(--lane); font-family:ui-monospace,monospace; font-size:9.5px; }
-      .card strong { display:block; margin:5px 0; font-size:11.5px; line-height:1.25; }
-      .card ul { margin:0; padding-left:13px; color:var(--muted); font-size:9.5px; line-height:1.38; }
-      .card li { margin:3px 0; }
-      .card.merge-card { border-style:dashed; }
-      .card.gate { border-top-color:var(--gate); }
-      .card.warn { border-top-color:var(--warn); }
-    </style>
-  </head>
-  <body>
-    <header class="topbar">
-      <div><div class="brand">EGCS · Genesys Cloud migration center</div><h1>Migration full flow</h1></div>
-      <p class="subtitle">Manual and scheduled entry points share one task model and one execution chain.</p>
-    </header>
-    <ol class="rail">
-      <li><span>01</span>Environment</li><li><span>02</span>Connectivity</li><li><span>03</span>Snapshot</li><li><span>04</span>Task</li><li><span>05</span>Schedule</li><li><span>06</span>Dependency</li><li><span>07</span>HCL</li><li><span>08</span>Plan</li><li><span>09</span>Review</li><li><span>10</span>Confirm</li><li><span>11</span>Apply</li><li><span>12</span>Guard</li><li><span>13</span>Result</li>
-    </ol>
-    <main class="viewport" aria-label="Migration flow diagram">
-      <div class="canvas">
-        <div class="entry">
-          <div class="entry-card"><span>Entry A · Manual</span><strong>Created migration task</strong><small>Requires diff approval</small></div>
-          <div class="merge">→</div>
-          <div class="entry-card"><span>Entry B · Scheduled</span><strong>Automatic sync task</strong><small>Plan-first execution</small></div>
-        </div>
-        <section class="lane" style="--lane:var(--ui)">
-          <div class="lane-label"><strong><i></i>EGCS-UI</strong><span>Vue.js · user operations</span></div>
-          <div class="grid">
-            <article class="card" style="grid-column:1"><span>01</span><strong>Create OAuth environment</strong><ul><li>Environment key and API domain</li><li>Production flag</li></ul></article>
-            <article class="card" style="grid-column:2"><span>02</span><strong>Probe connectivity</strong><ul><li>Organisation match</li><li>Permissions and resource count</li></ul></article>
-            <article class="card" style="grid-column:3"><span>03</span><strong>Browse and snapshot</strong><ul><li>23 resource types</li><li>Division-level baseline</li></ul></article>
-            <article class="card" style="grid-column:4"><span>04</span><strong>Migration wizard</strong><ul><li>Select resources</li><li>Configure DAG and mode</li></ul></article>
-            <article class="card" style="grid-column:5"><span>05</span><strong>Schedule sync</strong><ul><li>Period and target pair</li><li>Pause and retry policy</li></ul></article>
-            <article class="card" style="grid-column:9"><span>09</span><strong>Review diff</strong><ul><li>Added / changed / deleted fields</li><li>Live SSE logs</li></ul></article>
-            <article class="card gate" style="grid-column:10"><span>10</span><strong>Confirm migration</strong><ul><li>Review dependencies</li><li>Production code</li></ul></article>
-            <article class="card" style="grid-column:13"><span>13</span><strong>Evidence and report</strong><ul><li>CSV and audit exports</li><li>DataAction reports</li></ul></article>
-          </div>
-        </section>
-        <section class="lane" style="--lane:var(--engine)">
-          <div class="lane-label"><strong><i></i>SyncEngine</strong><span>Java · backend orchestration</span></div>
-          <div class="grid">
-            <article class="card" style="grid-column:1"><span>01</span><strong>Secure credentials</strong><ul><li>AES-256-GCM</li><li>Masked output and logs</li></ul></article>
-            <article class="card" style="grid-column:2"><span>02</span><strong>SDK validation</strong><ul><li>Users / divisions</li><li>Paginated 23-type scan</li></ul></article>
-            <article class="card merge-card" style="grid-column:4 / span 2"><span>04–05</span><strong>Unify entry points</strong><ul><li>Manual: CREATED and manual review</li><li>Scheduled: automatic chain</li></ul></article>
-            <article class="card" style="grid-column:6"><span>06</span><strong>Dependency closure</strong><ul><li>Resource graph</li><li>Flow YAML reference scan</li></ul></article>
-            <article class="card" style="grid-column:7"><span>07</span><strong>Map and render HCL</strong><ul><li>SDK to Terraform model</li><li>Workspace generation</li></ul></article>
-            <article class="card" style="grid-column:8"><span>08</span><strong>Init → plan → show</strong><ul><li>Structured diff parsing</li><li>State management</li></ul></article>
-            <article class="card" style="grid-column:9"><span>09</span><strong>Advance state machine</strong><ul><li>CREATED → DIFFING</li><li>DEPENDENCY_REVIEW → PLANNED</li></ul></article>
-            <article class="card gate" style="grid-column:10"><span>10</span><strong>Verification gate</strong><ul><li>6-digit code</li><li>Retry limit and lockout</li></ul></article>
-            <article class="card" style="grid-column:11"><span>11</span><strong>Import and batch apply</strong><ul><li>Terraform import existing resources</li><li>Layer-by-layer apply</li></ul></article>
-            <article class="card warn" style="grid-column:12"><span>12</span><strong>Pause and recover</strong><ul><li>Layer pending review</li><li>Resume or skip-error</li></ul></article>
-            <article class="card" style="grid-column:13"><span>13</span><strong>Close task</strong><ul><li>Success / partial / failed</li><li>Snapshot rollback if needed</li></ul></article>
-          </div>
-        </section>
-        <section class="lane" style="--lane:var(--target)">
-          <div class="lane-label"><strong><i></i>Genesys Cloud</strong><span>Source and target organisations</span></div>
-          <div class="grid">
-            <article class="card" style="grid-column:1"><span>01</span><strong>Authorise source</strong><ul><li>Client Credentials</li><li>Read scope</li></ul></article>
-            <article class="card" style="grid-column:2"><span>02</span><strong>Read source resources</strong><ul><li>Users / queues / flows</li><li>Data tables and actions</li></ul></article>
-            <article class="card" style="grid-column:3"><span>03</span><strong>Preserve baseline</strong><ul><li>Type and division snapshot</li><li>Restorable rollback point</li></ul></article>
-            <article class="card" style="grid-column:7"><span>07</span><strong>Terraform workspace</strong><ul><li>Task-isolated directory</li><li>Credentials injected by environment</li></ul></article>
-            <article class="card" style="grid-column:8"><span>08</span><strong>Plan and state</strong><ul><li>JSON / text plan</li><li>Terraform state store</li></ul></article>
-            <article class="card" style="grid-column:11"><span>11</span><strong>Write target organisation</strong><ul><li>Create / update / import</li><li>Layer-by-layer progress</li></ul></article>
-            <article class="card" style="grid-column:13"><span>13</span><strong>Effective target state</strong><ul><li>Flows and queues live</li><li>Visible in target admin console</li></ul></article>
-          </div>
-        </section>
-      </div>
-    </main>
-  </body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EGCS · Genesys Cloud Migration Full Flow</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f1f0ea'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='16' text-anchor='middle' fill='%2317191a'%3EE%3C/text%3E%3C/svg%3E">
+<script>
+  if ("scrollRestoration" in history) { history.scrollRestoration = "manual"; }
+</script>
+<style>
+  :root{
+    --paper:#f1f0ea;
+    --card:#fbfaf6;
+    --ink:#17191a;
+    --ink-2:#4c5150;
+    --ink-3:#838883;
+    --ink-4:#b6bab2;
+    --rule:#d3d2c7;
+    --rule-2:#e4e2d8;
+    --seal:#a93b2c;
+
+    --lane-ui:#2e5a6b;
+    --lane-engine:#6a4f3e;
+    --lane-target:#44654a;
+
+    --label-w:9.25rem;
+    --col-w:18.75rem;
+    --gap:3rem;
+  }
+
+  *{box-sizing:border-box}
+  html{font-size:16px}
+  body{
+    height:100vh;
+    margin:0;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Segoe UI","Microsoft YaHei UI","Microsoft YaHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ============ 报头 ============ */
+  .masthead{
+    flex:none;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:2rem;
+    padding:1.1rem 2rem .95rem;
+    border-bottom:1px solid var(--ink);
+  }
+  .brand{
+    display:block;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:.6875rem;
+    letter-spacing:.2em;
+    color:var(--ink-2);
+  }
+  .masthead h1{
+    margin:.1rem 0 .2rem;
+    font-size:1.75rem;
+    font-weight:600;
+    letter-spacing:-.012em;
+    line-height:1.15;
+  }
+  .masthead p{
+    margin:0;
+    max-width:44rem;
+    font-size:.75rem;
+    line-height:1.5;
+    color:var(--ink-2);
+  }
+
+  .masthead__side{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:.55rem;
+    flex:none;
+    padding-bottom:.15rem;
+  }
+  .legend{
+    display:flex;
+    gap:1.35rem;
+    margin:0;
+    padding:0;
+    list-style:none;
+    font-size:.6875rem;
+    color:var(--ink-2);
+  }
+  .legend li{display:flex;align-items:center;gap:.4rem}
+  .legend i{
+    width:.45rem;height:.45rem;
+    background:var(--c);
+    display:inline-block;
+  }
+  .legend span{color:var(--ink-3);font-size:.625rem}
+
+  .side-row{display:flex;align-items:center;gap:1rem}
+  .hint{
+    font-size:.625rem;
+    letter-spacing:.02em;
+    color:var(--ink-3);
+  }
+  .fs{
+    appearance:none;
+    background:transparent;
+    border:1px solid var(--rule);
+    border-radius:0;
+    padding:.18rem .5rem;
+    font-family:inherit;
+    font-size:.625rem;
+    letter-spacing:.06em;
+    color:var(--ink-2);
+    cursor:pointer;
+    transition:border-color .15s,color .15s;
+  }
+  .fs:hover{border-color:var(--ink-3);color:var(--ink)}
+  .fs:focus-visible{outline:1px solid var(--seal);outline-offset:2px}
+
+  /* ============ Stage轨 ============ */
+  .rail{
+    flex:none;
+    position:relative;
+    padding:.95rem 2rem .45rem;
+    border-bottom:1px solid var(--rule-2);
+  }
+  .rail__line,
+  .rail__fill{
+    position:absolute;
+    left:2rem;
+    top:.6rem;
+    height:1px;
+  }
+  .rail__line{right:2rem;background:var(--rule)}
+  .rail__fill{width:0;background:var(--ink)}
+  .rail__ticks{
+    position:relative;
+    display:flex;
+    margin:0;
+    padding:0;
+    list-style:none;
+  }
+  .tick{
+    flex:1 1 0;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:.08rem;
+    color:var(--ink-3);
+    transition:color .2s;
+  }
+  .tick::before{
+    content:"";
+    position:absolute;
+    top:-.35rem;
+    width:1px;
+    height:.45rem;
+    background:var(--rule);
+  }
+  .tick__no{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:.625rem;
+    letter-spacing:.06em;
+  }
+  .tick__name{
+    font-size:.625rem;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    padding-right:.6rem;
+  }
+  .tick.is-active{color:var(--ink)}
+  .tick.is-active .tick__no{color:var(--seal)}
+  .tick.is-active::before{background:var(--seal);width:2px}
+
+  /* ============ 画布 ============ */
+  .viewport{
+    flex:1;
+    min-height:0;
+    position:relative;
+    overflow-x:auto;
+    overflow-y:hidden;
+    cursor:grab;
+    overscroll-behavior:contain;
+    overflow-anchor:none;
+    scrollbar-width:thin;
+    scrollbar-color:#b9bcb2 transparent;
+  }
+  .viewport:focus-visible{outline:none}
+  .viewport.is-dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
+  .viewport.is-dragging *{cursor:grabbing}
+  .viewport::-webkit-scrollbar{height:9px}
+  .viewport::-webkit-scrollbar-track{background:transparent}
+  .viewport::-webkit-scrollbar-thumb{background:#c3c5bb;border:3px solid var(--paper)}
+  .viewport::-webkit-scrollbar-thumb:hover{background:#a8aba1}
+
+  .canvas{
+    position:relative;
+    width:max-content;
+    padding:1.05rem 2rem .6rem 0;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .wires{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    overflow:visible;
+    pointer-events:none;
+  }
+  .wire{
+    fill:none;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    opacity:.68;
+    transition:opacity .15s,stroke-width .15s;
+  }
+  .wire--chain{stroke-width:1.2}
+  .wire--link{stroke-width:1;stroke-dasharray:4 4;opacity:.5}
+  .wire--auto{stroke-width:1.2;stroke-dasharray:3 5;opacity:.8}
+  .wire--drop{stroke-width:1.2}
+  .wire.is-lit{opacity:1;stroke-width:1.9}
+  .wire-label{
+    font-family:"Segoe UI","Microsoft YaHei UI","Microsoft YaHei",sans-serif;
+    font-size:.5625rem;
+    letter-spacing:.03em;
+    fill:var(--seal);
+  }
+
+  /* ============ Stage表头 ============ */
+  .stage-head{
+    display:flex;
+    position:relative;
+    z-index:3;
+    margin-bottom:.2rem;
+  }
+  .stage-head__label{
+    position:sticky;
+    left:0;
+    z-index:5;
+    flex:0 0 var(--label-w);
+    align-self:stretch;
+    display:flex;
+    align-items:flex-end;
+    padding:0 1rem .5rem 2rem;
+    background:var(--paper);
+    font-size:.5625rem;
+    letter-spacing:.16em;
+    color:var(--ink-4);
+  }
+  .stage-head__label::after,
+  .lane-label::after{
+    content:"";
+    position:absolute;
+    right:-1rem;
+    top:0;
+    bottom:0;
+    width:1rem;
+    background:linear-gradient(90deg,var(--paper),rgba(241,240,234,0));
+    pointer-events:none;
+  }
+  .stage-head__track{
+    display:grid;
+    grid-template-columns:repeat(13,var(--col-w));
+    column-gap:var(--gap);
+    flex:none;
+    border-bottom:1px solid var(--ink);
+  }
+  .stage{
+    display:flex;
+    flex-direction:column;
+    gap:.05rem;
+    padding:.5rem 0 .45rem;
+    position:relative;
+  }
+  .stage__no{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:1.05rem;
+    line-height:1;
+    letter-spacing:.02em;
+    color:var(--ink-4);
+    transition:color .2s;
+  }
+  .stage__name{
+    font-size:.6875rem;
+    line-height:1.3;
+    color:var(--ink-2);
+    white-space:nowrap;
+    transition:color .2s;
+  }
+  .stage.is-active .stage__no{color:var(--seal)}
+  .stage.is-active .stage__name{color:var(--ink)}
+
+  /* ============ 版心与泳道 ============ */
+  .board{position:relative;z-index:1}
+
+  .gridlines{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+  }
+  .gridlines i{
+    position:absolute;
+    top:0;
+    bottom:0;
+    width:1px;
+    background:#c8c6ba;
+  }
+
+  .lanes{position:relative;z-index:1}
+  .lane{
+    display:flex;
+    align-items:stretch;
+    position:relative;
+  }
+  .lane + .lane{margin-top:.85rem}
+  /* 引擎层与目标层之间留出定时任务自动路径的走线走廊 */
+  .lane[data-lane="target"]{margin-top:2.4rem}
+
+  .lane-label{
+    position:sticky;
+    left:0;
+    z-index:5;
+    flex:0 0 var(--label-w);
+    align-self:stretch;
+    display:flex;
+    flex-direction:column;
+    gap:.1rem;
+    padding:.6rem 1rem .5rem 2rem;
+    background:var(--paper);
+  }
+  .lane-label__name{
+    display:flex;
+    align-items:center;
+    gap:.4rem;
+    font-size:.72rem;
+    font-weight:600;
+    line-height:1.25;
+    letter-spacing:.01em;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .lane-label__name i{
+    width:.4rem;height:.4rem;
+    background:var(--lane);
+    display:inline-block;
+    flex:none;
+  }
+  .lane-label__sub{
+    font-family:"Cascadia Mono",Consolas,monospace;
+    font-size:.5625rem;
+    line-height:1.5;
+    color:var(--ink-3);
+    letter-spacing:.01em;
+  }
+
+  .lane-track{
+    display:grid;
+    grid-template-columns:repeat(13,var(--col-w));
+    column-gap:var(--gap);
+    align-items:start;
+    flex:none;
+    padding-top:.35rem;
+  }
+
+  /* ============ 卡片 ============ */
+  .card{
+    position:relative;
+    width:var(--col-w);
+    padding:.7rem .8rem .65rem .85rem;
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:2px;
+    transition:border-color .18s,background-color .18s;
+    animation:enter .35s ease-out both;
+    animation-delay:var(--d,0ms);
+  }
+  .card:hover{
+    border-color:var(--ink-3);
+    background:#fff;
+  }
+  .card__ref{
+    margin:0;
+    font-family:"Cascadia Mono",Consolas,monospace;
+    font-size:.5625rem;
+    line-height:1.4;
+    letter-spacing:.01em;
+    color:var(--ink-3);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .card h3{
+    margin:.28rem 0 .38rem;
+    font-size:.8125rem;
+    font-weight:600;
+    line-height:1.35;
+    letter-spacing:.005em;
+    color:var(--ink);
+  }
+  .card ul{margin:0;padding:0;list-style:none}
+  .card li{
+    position:relative;
+    padding-left:.72rem;
+    margin-bottom:.18rem;
+    font-size:.6875rem;
+    line-height:1.62;
+    color:var(--ink-2);
+  }
+  .card li:last-child{margin-bottom:0}
+  .card li::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:.62em;
+    width:.3rem;
+    height:1px;
+    background:var(--ink-4);
+  }
+  .card li b{color:var(--ink);font-weight:600}
+  .card__tags{
+    margin:.5rem 0 0;
+    font-family:"Cascadia Mono",Consolas,monospace;
+    font-size:.5625rem;
+    line-height:1.4;
+    letter-spacing:.01em;
+    color:var(--ink-3);
+  }
+  .card--span{width:auto}
+
+  .merge-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1.4rem;
+    margin-top:.4rem;
+  }
+  .merge-cell__label{
+    display:block;
+    font-size:.5625rem;
+    letter-spacing:.04em;
+    color:var(--ink-3);
+    margin-bottom:.22rem;
+  }
+  .merge-cell--auto .merge-cell__label{color:var(--seal)}
+  .merge-cell p{
+    margin:0;
+    font-size:.6875rem;
+    line-height:1.62;
+    color:var(--ink-2);
+  }
+  .merge-cell p b{color:var(--ink);font-weight:600}
+  .card__note{
+    margin:.55rem 0 0;
+    padding-top:.42rem;
+    border-top:1px solid var(--rule-2);
+    font-family:"Cascadia Mono",Consolas,monospace;
+    font-size:.5625rem;
+    line-height:1.5;
+    color:var(--ink-3);
+  }
+
+  .card--seal .card__ref{color:var(--seal)}
+
+  @keyframes enter{
+    from{opacity:0;transform:translateY(4px)}
+    to{opacity:1;transform:none}
+  }
+
+  /* ============ 脚注 ============ */
+  .colophon{
+    flex:none;
+    display:flex;
+    flex-wrap:wrap;
+    gap:1.4rem;
+    padding:.42rem 2rem;
+    border-top:1px solid var(--rule-2);
+    font-size:.5625rem;
+    line-height:1.4;
+    letter-spacing:.02em;
+    color:var(--ink-3);
+  }
+  .colophon span + span::before{
+    content:"·";
+    margin-right:1.4rem;
+    color:var(--ink-4);
+  }
+
+  @media (max-width:1180px){
+    .legend{display:none}
+    .masthead h1{font-size:1.45rem}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div>
+    <span class="brand">EGCS · GENESYS CLOUD MIGRATION CENTER</span>
+    <h1>Migration full flow</h1>
+    <p>Two entry points share one execution chain: manual tasks require approval; scheduled tasks run automatically.</p>
+  </div>
+  <div class="masthead__side">
+    <ul class="legend">
+      <li style="--c:var(--lane-ui)"><i></i>User operations<span>EGCS-UI</span></li>
+      <li style="--c:var(--lane-engine)"><i></i>Backend engine<span>SyncEngine / Terraform</span></li>
+      <li style="--c:var(--lane-target)"><i></i>Genesys Cloud<span>Org / workspace</span></li>
+    </ul>
+    <div class="side-row">
+      <span class="hint">Wheel scroll · drag · arrow keys</span>
+      <button class="fs" id="fsBtn" type="button">Fullscreen</button>
+    </div>
+  </div>
+</header>
+
+<nav class="rail" aria-label="Migration progress">
+  <div class="rail__line"></div>
+  <div class="rail__fill" id="railFill"></div>
+  <ol class="rail__ticks" id="railTicks"></ol>
+</nav>
+
+<main class="viewport" id="viewport" tabindex="0" role="region" aria-label="EGCS Migration full flow, horizontally scrollable">
+  <div class="canvas" id="canvas">
+    <svg class="wires" id="wires" xmlns="http://www.w3.org/2000/svg"></svg>
+
+    <div class="stage-head">
+      <div class="stage-head__label">Stage</div>
+      <div class="stage-head__track" id="stageHead"></div>
+    </div>
+
+    <div class="board">
+      <div class="gridlines" aria-hidden="true" id="gridlines"></div>
+      <div class="lanes" id="lanes"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="colophon">
+  <span>Mock integration requires no real Genesys credentials</span>
+  <span>Terraform credentials are passed only through GENESYSCLOUD_* variables</span>
+  <span>Production targets require a 6-digit code, valid for 5 minutes, locked after 5 failures</span>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var LANES = [
+    { key: "ui", name: "User operations", sub: "EGCS-UI · Vue 3", color: "#2e5a6b" },
+    { key: "engine", name: "Backend engine", sub: "egcs-service · SyncEngine", color: "#6a4f3e" },
+    { key: "target", name: "Genesys Cloud", sub: "Target org · workspace", color: "#44654a" }
+  ];
+
+  var STAGES = [
+    { key: "env", no: "01", name: "Environment · OAuth" },
+    { key: "conn", no: "02", name: "Connectivity test" },
+    { key: "res", no: "03", name: "Resources · snapshots" },
+    { key: "task", no: "04", name: "Create migration task" },
+    { key: "timer", no: "05", name: "Schedule sync" },
+    { key: "closure", no: "06", name: "Dependency closure" },
+    { key: "hcl", no: "07", name: "Generate HCL" },
+    { key: "plan", no: "08", name: "Plan · parse" },
+    { key: "review", no: "09", name: "Dependencies / diff" },
+    { key: "confirm", no: "10", name: "Confirm · verification" },
+    { key: "apply", no: "11", name: "Execute · apply" },
+    { key: "guard", no: "12", name: "Pause · layer approval" },
+    { key: "result", no: "13", name: "Results" }
+  ];
+
+  var CARDS = [
+    { id: "ui-env", stage: "env", lane: "ui", kicker: "migration/env · environment", title: "Create OAuth client", points: ["Enter envKey, API domain, Organisation ID, client ID and secret", "Mark production environments to enable verification", "Leaving Secret blank preserves the existing value"], chips: ["Client Credentials", "AES-256-GCM"] },
+    { id: "eng-env", stage: "env", lane: "engine", kicker: "MigrationEnvServiceImpl", title: "Encrypted credentials", points: ["Secrets are stored with AES-256-GCM", "Only masked client IDs appear in APIs and logs", "Environment names and production markers are delivered securely"], chips: ["SensitiveCrypto"] },
+    { id: "tgt-auth", stage: "env", lane: "target", kicker: "Genesys Cloud · source org", title: "Authorise source organisation", points: ["Exchange client credentials for an access token", "Require read scope for the migration resources"], chips: ["Source environment"] },
+    { id: "ui-conn", stage: "conn", lane: "ui", kicker: "Environment card · connectivity", title: "Probe connectivity", points: ["Validate connectivity and Organisation ID", "Report permissions and resource counts", "Surface failures directly on the environment card"], chips: ["MigrationEnvController"] },
+    { id: "eng-sdk", stage: "conn", lane: "engine", kicker: "platform-client-v2", title: "Read source organisation", points: ["Read /users/me and division lists", "Paginate counts across 23 resource types", "Mark the environment unavailable on failure"], chips: ["Genesys SDK"] },
+    { id: "tgt-live", stage: "conn", lane: "target", kicker: "Source org · live data", title: "Read source resources", points: ["Users, queues, flows, data tables and more", "Read-only; never write back to the source"], chips: ["read-only"] },
+    { id: "ui-res", stage: "res", lane: "ui", kicker: "migration/resource · snapshot", title: "Browse resources and snapshot", points: ["Browse 23 resource types with detail views", "Snapshot by type/division or selected resources", "Use snapshots as restorable rollback baselines"], chips: ["Resource index", "Snapshot baseline"] },
+    { id: "eng-read", stage: "res", lane: "engine", kicker: "Genesys resource services", title: "Resource reads and snapshots", points: ["Shared resource-controller routing and permissions", "Persist incremental resource-index updates", "MigrationSnapshotService creates snapshot batches"], chips: ["Resource registry"] },
+    { id: "tgt-snap", stage: "res", lane: "target", kicker: "Baseline snapshot", title: "Restorable resource definitions", points: ["Pin definitions by resource type and division", "Rollback restores the target from this baseline"], chips: ["Restore point"] },
+    { id: "ui-task", stage: "task", lane: "ui", kicker: "Entry A · task centre", title: "Create migration task", points: ["Three steps: select resources · configure plan · confirm", "The plan includes DAG order, mode, dependencies and duration", "Submission creates the task only; <b>diff approval is required</b>"], chips: ["MIGRATION", "MERGE", "ROLLBACK", "SNAPSHOT_ONLY"] },
+    { id: "ui-timer", stage: "timer", lane: "ui", kicker: "Entry B · scheduled sync", title: "Configure scheduled execution", points: ["Select environment pair, cycle and execution mode", "Retry failures automatically and support pause protection", "At the scheduled time, create and execute <b>without manual approval</b>"], chips: ["MigrationSyncTimer", "Scheduling"] },
+    { id: "eng-merge", stage: "task", lane: "engine", span: 2, kicker: "POST /migration/sync/tasks · MigrationSyncTimer", title: "Two entry points, one task model", body: '<div class="merge-grid"><div class="merge-cell"><span class="merge-cell__label">Manual · migration task</span><p>The wizard stores the task as <b>CREATED</b> and waits at the diff page for manual approval.</p></div><div class="merge-cell merge-cell--auto"><span class="merge-cell__label">Scheduled · automatic sync</span><p>The scheduler creates and runs the task, bypassing manual approval and entering the execution chain.</p></div></div><p class="card__note">Only one active task group is allowed per target; mock or Terraform is selected by integration mode</p>' },
+    { id: "eng-closure", stage: "closure", lane: "engine", kicker: "crossorg · beginDiff", title: "Dependency closure", points: ["Export source resources and calculate cross-org closure", "Use ResourceRegistry, DependencyGraph and ScopeResolver", "Scan Flow Archy YAML references"], chips: ["FlowYamlReferenceScanner"] },
+    { id: "eng-hcl", stage: "hcl", lane: "engine", kicker: "mapping · render · HCL", title: "Map SDK resources to Terraform", points: ["Resource mappers convert SDK models to TerraformResource", "Renderer and TerraformHclGenerator generate workspace HCL", "Pure text generation has no I/O and is unit-testable"], chips: ["TerraformHclGenerator", "FlowYamlRewriter"] },
+    { id: "tgt-hcl", stage: "hcl", lane: "target", kicker: "Migration workspace", title: "Isolated HCL workspace", points: ["Each task receives an independent workspace", "Credentials never enter HCL and are injected through environment variables"], chips: [".tf files"] },
+    { id: "eng-plan", stage: "plan", lane: "engine", kicker: "TerraformExecutor", title: "init · plan · show", points: ["Run subprocesses with timeout control and streamed stdout/stderr", "Inject credentials only through GENESYSCLOUD_* variables", "Parse Terraform plans into structured diffs"], chips: ["TerraformPlanParser"] },
+    { id: "tgt-plan", stage: "plan", lane: "target", kicker: "Terraform", title: "Plan output and state", points: ["Produce JSON or text plan output", "TerraformStateStore manages state"], chips: [".tfstate"] },
+    { id: "ui-diff", stage: "review", lane: "ui", kicker: "Task details · diff page", title: "Review dependencies and diff", points: ["Field diff: + add / ~ change / - delete, polled by afterSeq", "Resolve the dependency tree by rescan or individual decision", "Stream SSE terminal logs and de-duplicate by lineNo"], chips: ["TaskLogPusher", "SSE", "afterSeq"] },
+    { id: "eng-state", stage: "review", lane: "engine", kicker: "TaskStatus", title: "Advance task state", points: ["CREATED · DIFFING · DEPENDENCY_REVIEW · PLANNED", "Pause for missing, ambiguous or circular dependencies", "Terminal and cancellation rules are enforced directly"], chips: ["DEPENDENCY_REVIEW", "PLANNED"] },
+    { id: "ui-confirm", stage: "confirm", lane: "ui", kicker: "Diff page · migration confirmation", title: "Confirm and submit", points: ["Review the diff and dependency decisions", "For production targets, enter a 6-digit verification code"], chips: ["Valid for 5 minutes", "Locked after 5 failures"] },
+    { id: "eng-gate", stage: "confirm", lane: "engine", kicker: "POST /tasks/{id}/confirm", title: "Verification-code gate", points: ["PLANNED · WAITING_CODE · APPLYING", "Non-production moves directly to APPLYING", "Locked tasks require unlocking before retry"], chips: ["MigrationTaskController"] },
+    { id: "eng-apply", stage: "apply", lane: "engine", kicker: "beginApply", title: "Apply execution pipeline", points: ["TerraformImportPlanner imports existing target resources", "TerraformBatchPlanner applies dependency layers in sequence", "TerraformApplyParser writes details and diff changes back"], chips: ["import · batch · apply"] },
+    { id: "eng-guard", stage: "guard", lane: "engine", kicker: "Layer approval / failure policy", title: "Pause and manual intervention", points: ["Layer approval pauses at LAYER_PENDING_REVIEW", "failPolicy = AUTO_PAUSE · AUTO_PAUSED", "Resume or skip-error continues execution"], chips: ["LAYER_PENDING_REVIEW", "AUTO_PAUSED"], tone: "seal" },
+    { id: "tgt-write", stage: "apply", lane: "target", kicker: "Target org", title: "Write to Genesys Cloud", points: ["Import, create and update resources by layer", "Every step produces a task detail"], chips: ["apply"] },
+    { id: "ui-report", stage: "result", lane: "ui", kicker: "Task details · audit · dashboard", title: "Results and evidence", points: ["Progress, details and log downloads", "Export task CSV, user comparison and unsynchronised DataActions", "Audit logs are retained for 180 days and exportable"], chips: ["Export reports", "Audit search"] },
+    { id: "eng-final", stage: "result", lane: "engine", kicker: "Terminal states and bypass", title: "Close task", points: ["Terminal states: SUCCESS / PARTIAL_SUCCESS / FAILED", "Snapshot rollback bypasses DIFFING/PLANNED and enters APPLYING", "Persist audit records for the complete action trail"], chips: ["MigrationSyncTimer", "Audit"] },
+    { id: "tgt-final", stage: "result", lane: "target", kicker: "Data presentation", title: "Target environment updated", points: ["Queues, flows, data actions, groups and users", "Verify directly in the Genesys Cloud admin console"], chips: ["Target org"] }
+  ];
+
+  var EDGES = [
+    ["ui-env", "eng-env", "chain"],
+    ["eng-env", "tgt-auth", "link"],
+    ["tgt-live", "eng-sdk", "link"],
+    ["ui-conn", "eng-sdk", "chain"],
+    ["ui-res", "eng-read", "chain"],
+    ["ui-task", "eng-merge", "drop"],
+    ["ui-timer", "eng-merge", "drop"],
+    ["eng-hcl", "tgt-hcl", "link"],
+    ["eng-plan", "ui-diff", "chain"],
+    ["eng-plan", "tgt-plan", "link"],
+    ["ui-confirm", "eng-gate", "chain"],
+    ["eng-plan", "eng-apply", "auto"]
+  ];
+
+  /* 两条入口是并列关系，不串成链 */
+  var SKIP_CHAIN = {
+    "ui-task>ui-timer": true,
+    "ui-timer>ui-diff": true
+  };
+
+  var stageIndex = {};
+  STAGES.forEach(function (s, i) { stageIndex[s.key] = i; });
+
+  var laneColor = {};
+  LANES.forEach(function (l) { laneColor[l.key] = l.color; });
+
+  var viewport = document.getElementById("viewport");
+  var canvas = document.getElementById("canvas");
+  var svg = document.getElementById("wires");
+  var lanesEl = document.getElementById("lanes");
+  var stageHead = document.getElementById("stageHead");
+  var gridlines = document.getElementById("gridlines");
+  var railTicks = document.getElementById("railTicks");
+  var railFill = document.getElementById("railFill");
+  var masthead = document.querySelector(".masthead");
+  var rail = document.querySelector(".rail");
+  var colophon = document.querySelector(".colophon");
+
+  /* ---------- Stage表头 ---------- */
+  stageHead.innerHTML = STAGES.map(function (s) {
+    return '<div class="stage" data-key="' + s.key + '">' +
+             '<span class="stage__no">' + s.no + "</span>" +
+             '<span class="stage__name">' + s.name + "</span>" +
+           "</div>";
+  }).join("");
+
+  /* ---------- 版心纵线 ---------- */
+  gridlines.innerHTML = STAGES.map(function () { return "<i></i>"; }).join("");
+
+  /* ---------- 进度轨 ---------- */
+  railTicks.innerHTML = STAGES.map(function (s) {
+    return '<li class="tick" data-index="' + stageIndex[s.key] + '">' +
+             '<span class="tick__no">' + s.no + "</span>" +
+             '<span class="tick__name">' + s.name + "</span>" +
+           "</li>";
+  }).join("");
+
+  /* ---------- 泳道与卡片 ---------- */
+  var cardOrder = 0;
+
+  function escapeAttr(s) { return String(s).replace(/"/g, "&quot;"); }
+
+  lanesEl.innerHTML = LANES.map(function (lane) {
+    var cards = CARDS.filter(function (c) { return c.lane === lane.key; });
+
+    var cells = cards.map(function (c) {
+      var col = stageIndex[c.stage] + 1;
+      var delay = Math.min(cardOrder * 18, 460);
+      cardOrder++;
+      var tags = (c.chips || []).join(" · ");
+      var points = (c.points || []).map(function (p) { return "<li>" + p + "</li>"; }).join("");
+      var span = c.span || 1;
+      var colRule = span > 1 · col + " / span " + span : String(col);
+      return '<article class="card' + (span > 1 · " card--span" : "") +
+             (c.tone === "seal" · " card--seal" : "") + '"' +
+             ' id="' + c.id + '" data-id="' + escapeAttr(c.id) + '"' +
+             ' style="grid-column:' + colRule + ';grid-row:1;--d:' + delay + 'ms">' +
+               '<p class="card__ref">' + c.kicker + "</p>" +
+               "<h3>" + c.title + "</h3>" +
+               (c.body · c.body : "<ul>" + points + "</ul>") +
+               (!c.body && tags · '<p class="card__tags">' + tags + "</p>" : "") +
+             "</article>";
+    }).join("");
+
+    return '<section class="lane" data-lane="' + lane.key + '">' +
+             '<div class="lane-label">' +
+               '<span class="lane-label__name" style="--lane:' + lane.color + '"><i></i>' + lane.name + "</span>" +
+               '<span class="lane-label__sub">' + lane.sub + "</span>" +
+             "</div>" +
+             '<div class="lane-track">' + cells + "</div>" +
+           "</section>";
+  }).join("");
+
+  /* ---------- 连线 ---------- */
+  var NS = "http://www.w3.org/2000/svg";
+
+  (function buildDefs() {
+    var defs = document.createElementNS(NS, "defs");
+    LANES.concat([{ key: "neutral", color: "#8a8f88" }, { key: "seal", color: "#a93b2c" }]).forEach(function (l) {
+      var m = document.createElementNS(NS, "marker");
+      m.setAttribute("id", "arrow-" + l.key);
+      m.setAttribute("viewBox", "0 0 8 8");
+      m.setAttribute("refX", "7");
+      m.setAttribute("refY", "4");
+      m.setAttribute("markerWidth", "6");
+      m.setAttribute("markerHeight", "6");
+      m.setAttribute("orient", "auto");
+      var p = document.createElementNS(NS, "path");
+      p.setAttribute("d", "M0.6,1 L7.2,4 L0.6,7 Z");
+      p.setAttribute("fill", l.color);
+      m.appendChild(p);
+      defs.appendChild(m);
+    });
+    svg.appendChild(defs);
+  })();
+
+  var wireEls = [];
+
+  function cardBox(el) {
+    var r = el.getBoundingClientRect();
+    var c = canvas.getBoundingClientRect();
+    return {
+      l: r.left - c.left,
+      r: r.right - c.left,
+      t: r.top - c.top,
+      b: r.bottom - c.top,
+      cx: (r.left + r.right) / 2 - c.left,
+      cy: (r.top + r.bottom) / 2 - c.top
+    };
+  }
+
+  function orthoPath(x1, y1, x2, y2) {
+    var r = 9;
+    if (Math.abs(y2 - y1) < 1) {
+      return "M" + x1 + "," + y1 + " L" + x2 + "," + y1;
+    }
+    var mid = (x1 + x2) / 2;
+    if (Math.abs(mid - x1) < r + 2 || Math.abs(mid - x2) < r + 2) {
+      return "M" + x1 + "," + y1 + " L" + x2 + "," + y2;
+    }
+    var s = y2 > y1 · 1 : -1;
+    return "M" + x1 + "," + y1 +
+           " H" + (mid - r) +
+           " Q" + mid + "," + y1 + " " + mid + "," + (y1 + s * r) +
+           " V" + (y2 - s * r) +
+           " Q" + mid + "," + y2 + " " + (mid + r) + "," + y2 +
+           " H" + x2;
+  }
+
+  function pathBetween(a, b) {
+    if (Math.abs(a.cx - b.cx) < 20) {
+      if (b.cy > a.cy) { return "M" + a.cx + "," + (a.b + 2) + " L" + b.cx + "," + (b.t - 5); }
+      return "M" + a.cx + "," + (a.t - 2) + " L" + b.cx + "," + (b.b + 5);
+    }
+    if (b.cx > a.cx) {
+      return orthoPath(a.r + 2, a.cy, b.l - 5, b.cy);
+    }
+    return orthoPath(a.l - 2, a.cy, b.r + 5, b.cy);
+  }
+
+  function drawWires() {
+    Array.prototype.slice.call(svg.querySelectorAll("path.wire, text.wire-label")).forEach(function (p) {
+      p.parentNode.removeChild(p);
+    });
+    wireEls = [];
+
+    var pairs = [];
+
+    LANES.forEach(function (lane) {
+      var track = document.querySelector('.lane[data-lane="' + lane.key + '"] .lane-track');
+      var cards = Array.prototype.slice.call(track.querySelectorAll(".card"));
+      for (var i = 0; i < cards.length - 1; i++) {
+        if (SKIP_CHAIN[cards[i].dataset.id + ">" + cards[i + 1].dataset.id]) { continue; }
+        pairs.push({ from: cards[i], to: cards[i + 1], kind: "chain", color: lane.color, key: lane.key });
+      }
+    });
+
+    EDGES.forEach(function (e) {
+      var from = document.getElementById(e[0]);
+      var to = document.getElementById(e[1]);
+      if (!from || !to) { return; }
+      var lane = from.closest(".lane").dataset.lane;
+      var auto = e[2] === "auto";
+      pairs.push({
+        from: from,
+        to: to,
+        kind: e[2],
+        mode: e[2],
+        color: auto · "#a93b2c" : laneColor[lane],
+        key: auto · "seal" : lane
+      });
+    });
+
+    pairs.forEach(function (p) {
+      var a = cardBox(p.from);
+      var b = cardBox(p.to);
+      var d;
+      if (p.mode === "drop") {
+        d = "M" + a.cx + "," + (a.b + 3) + " L" + a.cx + "," + (b.t - 6);
+      } else if (p.mode === "auto") {
+        d = autoPath(a, b);
+      } else {
+        d = pathBetween(a, b);
+      }
+      var path = document.createElementNS(NS, "path");
+      path.setAttribute("d", d);
+      path.setAttribute("class", "wire wire--" + p.kind);
+      path.setAttribute("stroke", p.color);
+      path.setAttribute("marker-end", "url(#arrow-" + p.key + ")");
+      path.dataset.from = p.from.dataset.id;
+      path.dataset.to = p.to.dataset.id;
+      svg.appendChild(path);
+      wireEls.push(path);
+      if (p.mode === "auto") { addAutoLabel(a, b); }
+    });
+  }
+
+  var rootFs = 16;
+
+  function autoPath(a, b) {
+    var y = Math.max(a.b, b.b) + rootFs * 1.2;
+    var s = b.cx > a.cx · 1 : -1;
+    var r = 8;
+    return "M" + a.cx + "," + (a.b + 3) +
+           " V" + (y - r) +
+           " Q" + a.cx + "," + y + " " + (a.cx + s * r) + "," + y +
+           " H" + (b.cx - s * r) +
+           " Q" + b.cx + "," + y + " " + b.cx + "," + (y - r) +
+           " V" + (b.b + 6);
+  }
+
+  function addAutoLabel(a, b) {
+    var y = Math.max(a.b, b.b) + rootFs * 1.2;
+    var t = document.createElementNS(NS, "text");
+    t.setAttribute("x", (a.cx + b.cx) / 2);
+    t.setAttribute("y", y - rootFs * 0.42);
+    t.setAttribute("text-anchor", "middle");
+    t.setAttribute("class", "wire-label");
+    t.textContent = "Scheduled task: plan completion skips dependency review and verification";
+    svg.appendChild(t);
+  }
+
+  function sizeSvg() {
+    svg.setAttribute("width", canvas.offsetWidth);
+    svg.setAttribute("height", canvas.offsetHeight);
+    svg.setAttribute("viewBox", "0 0 " + canvas.offsetWidth + " " + canvas.offsetHeight);
+  }
+
+  /* ---------- 悬停高亮 ---------- */
+  Array.prototype.slice.call(document.querySelectorAll(".card")).forEach(function (card) {
+    var id = card.dataset.id;
+    card.addEventListener("mouseenter", function () {
+      wireEls.forEach(function (w) {
+        if (w.dataset.from === id || w.dataset.to === id) { w.classList.add("is-lit"); }
+      });
+      card.style.zIndex = "4";
+    });
+    card.addEventListener("mouseleave", function () {
+      wireEls.forEach(function (w) { w.classList.remove("is-lit"); });
+      card.style.zIndex = "";
+    });
+  });
+
+  /* ---------- 按视口高度等比缩放 ---------- */
+  var scaleK = 1;
+
+  function fit() {
+    var root = document.documentElement;
+    root.style.fontSize = "16px";
+
+    var chrome = masthead.offsetHeight + rail.offsetHeight + colophon.offsetHeight;
+    var content = canvas.offsetHeight;
+    if (!content) { return; }
+
+    var k = (window.innerHeight - 12) / (chrome + content);
+    k = Math.max(0.55, Math.min(2.25, k));
+    scaleK = k;
+    root.style.fontSize = (16 * k).toFixed(3) + "px";
+  }
+
+  /* ---------- 度量与重绘 ---------- */
+  var headCells = Array.prototype.slice.call(stageHead.querySelectorAll(".stage"));
+  var tickEls = Array.prototype.slice.call(railTicks.querySelectorAll(".tick"));
+  var stageCenters = [];
+  var labelW = 0;
+
+  var gridEls = Array.prototype.slice.call(gridlines.querySelectorAll("i"));
+
+  function relayout() {
+    rootFs = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    labelW = document.querySelector(".stage-head__label").getBoundingClientRect().width;
+    stageCenters = headCells.map(function (el) {
+      return el.offsetLeft + el.offsetWidth / 2;
+    });
+
+    var gap = headCells.length > 1
+      · headCells[1].offsetLeft - (headCells[0].offsetLeft + headCells[0].offsetWidth)
+      : 0;
+
+    gridEls.forEach(function (el, i) {
+      var cell = headCells[i];
+      if (!cell) { return; }
+      el.style.left = (cell.offsetLeft + cell.offsetWidth + gap / 2) + "px";
+    });
+
+    sizeSvg();
+    drawWires();
+  }
+
+  var firstPaint = true;
+
+  function refresh() {
+    fit();
+    relayout();
+    if (firstPaint) {
+      firstPaint = false;
+      viewport.scrollLeft = 0;
+      targetX = 0;
+      currentX = 0;
+    }
+    syncRail();
+  }
+
+  /* ---------- 横向滚轮 ---------- */
+  var targetX = 0;
+  var currentX = 0;
+  var rafId = null;
+  var animating = false;
+
+  function step() {
+    currentX += (targetX - currentX) * 0.24;
+    if (Math.abs(targetX - currentX) < 0.6) {
+      currentX = targetX;
+      viewport.scrollLeft = currentX;
+      rafId = null;
+      animating = false;
+      return;
+    }
+    viewport.scrollLeft = currentX;
+    rafId = requestAnimationFrame(step);
+  }
+
+  viewport.addEventListener("wheel", function (e) {
+    var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) · e.deltaX : e.deltaY;
+    if (!d) { return; }
+    e.preventDefault();
+    var max = viewport.scrollWidth - viewport.clientWidth;
+    targetX = Math.max(0, Math.min(max, targetX + d * scaleK));
+    animating = true;
+    if (rafId === null) { rafId = requestAnimationFrame(step); }
+  }, { passive: false });
+
+  /* ---------- 拖拽平移 ---------- */
+  var dragging = false;
+  var startX = 0;
+  var startLeft = 0;
+
+  viewport.addEventListener("pointerdown", function (e) {
+    if (e.button !== 0) { return; }
+    dragging = true;
+    startX = e.clientX;
+    startLeft = viewport.scrollLeft;
+    viewport.classList.add("is-dragging");
+  });
+
+  window.addEventListener("pointermove", function (e) {
+    if (!dragging) { return; }
+    var dx = e.clientX - startX;
+    if (Math.abs(dx) > 2 && !animating) {
+      viewport.scrollLeft = startLeft - dx;
+      targetX = viewport.scrollLeft;
+      currentX = targetX;
+    }
+  });
+
+  window.addEventListener("pointerup", function () {
+    dragging = false;
+    viewport.classList.remove("is-dragging");
+  });
+
+  /* ---------- 键盘 ---------- */
+  viewport.addEventListener("keydown", function (e) {
+    var delta = 0;
+    if (e.key === "ArrowRight") { delta = 1; }
+    else if (e.key === "ArrowLeft") { delta = -1; }
+    else if (e.key === "Home") { delta = -1e6; }
+    else if (e.key === "End") { delta = 1e6; }
+    if (!delta) { return; }
+    e.preventDefault();
+    var max = viewport.scrollWidth - viewport.clientWidth;
+    var stepPx = Math.abs(delta) > 1 · 1e7 : viewport.clientWidth * 0.24;
+    targetX = Math.max(0, Math.min(max, viewport.scrollLeft + delta * stepPx));
+    animating = true;
+    if (rafId === null) { rafId = requestAnimationFrame(step); }
+  });
+
+  /* ---------- 进度与当前Stage ---------- */
+  var rafPending = false;
+
+  function syncRail() {
+    rafPending = false;
+    var max = viewport.scrollWidth - viewport.clientWidth;
+    var ratio = max > 0 · viewport.scrollLeft / max : 0;
+    var lineW = document.querySelector(".rail__line").getBoundingClientRect().width;
+    railFill.style.width = (ratio * lineW) + "px";
+
+    var probe = viewport.scrollLeft + labelW + (viewport.clientWidth - labelW) * 0.32;
+    var idx = 0;
+    for (var i = 0; i < stageCenters.length; i++) {
+      if (probe >= stageCenters[i]) { idx = i; }
+    }
+    headCells.forEach(function (el, i) { el.classList.toggle("is-active", i === idx); });
+    tickEls.forEach(function (el, i) { el.classList.toggle("is-active", i === idx); });
+  }
+
+  viewport.addEventListener("scroll", function () {
+    if (!animating && !dragging) {
+      targetX = viewport.scrollLeft;
+      currentX = targetX;
+    }
+    if (!rafPending) {
+      rafPending = true;
+      requestAnimationFrame(syncRail);
+    }
+  }, { passive: true });
+
+  /* ---------- 全屏 ---------- */
+  document.getElementById("fsBtn").addEventListener("click", function () {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+      return;
+    }
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen();
+    }
+  });
+
+  /* ---------- 尺寸变化 ---------- */
+  var resizeTimer = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(refresh, 120);
+  });
+
+  if ("scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
+  }
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      refresh();
+      resetStart();
+    });
+  }
+
+  var userTouched = false;
+  function markTouched() { userTouched = true; }
+  viewport.addEventListener("wheel", markTouched, { passive: true });
+  viewport.addEventListener("pointerdown", markTouched);
+  viewport.addEventListener("keydown", markTouched);
+
+  function resetStart() {
+    if (userTouched) { return; }
+    viewport.scrollLeft = 0;
+    targetX = 0;
+    currentX = 0;
+  }
+
+  /* 浏览器会在加载后对嵌套滚动容器做一次平滑的位置恢复，
+     这里在开局 3 秒内守门，把视口钉在起点；用户一操作立刻让位。 */
+  var guardUntil = performance.now() + 3000;
+
+  function guardStart() {
+    if (userTouched) { return; }
+    if (viewport.scrollLeft !== 0) { resetStart(); }
+    if (performance.now() < guardUntil) { requestAnimationFrame(guardStart); }
+  }
+
+  refresh();
+  viewport.focus({ preventScroll: true });
+  window.addEventListener("load", resetStart);
+  window.addEventListener("pageshow", resetStart);
+  requestAnimationFrame(guardStart);
+})();
+</script>
+</body>
 </html>
