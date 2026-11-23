@@ -194,10 +194,9 @@
   .viewport:focus-visible{outline:none}
   .viewport.is-dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
   .viewport.is-dragging *{cursor:grabbing}
-  .viewport::-webkit-scrollbar{height:9px}
-  .viewport::-webkit-scrollbar-track{background:transparent}
-  .viewport::-webkit-scrollbar-thumb{background:#c3c5bb;border:3px solid var(--paper)}
-  .viewport::-webkit-scrollbar-thumb:hover{background:#a8aba1}
+  .viewport::-webkit-scrollbar{display:none}
+  .rail{scrollbar-width:none;-ms-overflow-style:none}
+  .rail::-webkit-scrollbar{display:none}
 
   .canvas{
     position:relative;
@@ -680,15 +679,15 @@
       var tags = (c.chips || []).join(" · ");
       var points = (c.points || []).map(function (p) { return "<li>" + p + "</li>"; }).join("");
       var span = c.span || 1;
-      var colRule = span > 1 · col + " / span " + span : String(col);
-      return '<article class="card' + (span > 1 · " card--span" : "") +
-             (c.tone === "seal" · " card--seal" : "") + '"' +
+      var colRule = span > 1 ? col + " / span " + span : String(col);
+      return '<article class="card' + (span > 1 ? " card--span" : "") +
+             (c.tone === "seal" ? " card--seal" : "") + '"' +
              ' id="' + c.id + '" data-id="' + escapeAttr(c.id) + '"' +
              ' style="grid-column:' + colRule + ';grid-row:1;--d:' + delay + 'ms">' +
                '<p class="card__ref">' + c.kicker + "</p>" +
                "<h3>" + c.title + "</h3>" +
-               (c.body · c.body : "<ul>" + points + "</ul>") +
-               (!c.body && tags · '<p class="card__tags">' + tags + "</p>" : "") +
+               (c.body ? c.body : "<ul>" + points + "</ul>") +
+               (!c.body && tags ? '<p class="card__tags">' + tags + "</p>" : "") +
              "</article>";
     }).join("");
 
@@ -748,7 +747,7 @@
     if (Math.abs(mid - x1) < r + 2 || Math.abs(mid - x2) < r + 2) {
       return "M" + x1 + "," + y1 + " L" + x2 + "," + y2;
     }
-    var s = y2 > y1 · 1 : -1;
+    var s = y2 > y1 ? 1 : -1;
     return "M" + x1 + "," + y1 +
            " H" + (mid - r) +
            " Q" + mid + "," + y1 + " " + mid + "," + (y1 + s * r) +
@@ -796,8 +795,8 @@
         to: to,
         kind: e[2],
         mode: e[2],
-        color: auto · "#a93b2c" : laneColor[lane],
-        key: auto · "seal" : lane
+        color: auto ? "#a93b2c" : laneColor[lane],
+        key: auto ? "seal" : lane
       });
     });
 
@@ -829,7 +828,7 @@
 
   function autoPath(a, b) {
     var y = Math.max(a.b, b.b) + rootFs * 1.2;
-    var s = b.cx > a.cx · 1 : -1;
+    var s = b.cx > a.cx ? 1 : -1;
     var r = 8;
     return "M" + a.cx + "," + (a.b + 3) +
            " V" + (y - r) +
@@ -904,7 +903,7 @@
     });
 
     var gap = headCells.length > 1
-      · headCells[1].offsetLeft - (headCells[0].offsetLeft + headCells[0].offsetWidth)
+      ? headCells[1].offsetLeft - (headCells[0].offsetLeft + headCells[0].offsetWidth)
       : 0;
 
     gridEls.forEach(function (el, i) {
@@ -951,7 +950,7 @@
   }
 
   viewport.addEventListener("wheel", function (e) {
-    var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) · e.deltaX : e.deltaY;
+    var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     if (!d) { return; }
     e.preventDefault();
     var max = viewport.scrollWidth - viewport.clientWidth;
@@ -998,7 +997,7 @@
     if (!delta) { return; }
     e.preventDefault();
     var max = viewport.scrollWidth - viewport.clientWidth;
-    var stepPx = Math.abs(delta) > 1 · 1e7 : viewport.clientWidth * 0.24;
+    var stepPx = Math.abs(delta) > 1 ? 1e7 : viewport.clientWidth * 0.24;
     targetX = Math.max(0, Math.min(max, viewport.scrollLeft + delta * stepPx));
     animating = true;
     if (rafId === null) { rafId = requestAnimationFrame(step); }
@@ -1010,7 +1009,7 @@
   function syncRail() {
     rafPending = false;
     var max = viewport.scrollWidth - viewport.clientWidth;
-    var ratio = max > 0 · viewport.scrollLeft / max : 0;
+    var ratio = max > 0 ? viewport.scrollLeft / max : 0;
     var lineW = document.querySelector(".rail__line").getBoundingClientRect().width;
     railFill.style.width = (ratio * lineW) + "px";
 

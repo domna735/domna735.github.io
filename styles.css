@@ -687,6 +687,13 @@ h3 {
   border-radius: var(--radius);
   background: var(--bg-elev);
   box-shadow: var(--shadow);
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.migration-flow-frame::-webkit-scrollbar {
+  display: none;
 }
 
 /* Footer */
