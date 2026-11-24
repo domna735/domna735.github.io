@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EGCS · 完整遷移流程</title>
+<title>完整遷移流程</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f1f0ea'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='16' text-anchor='middle' fill='%2317191a'%3EE%3C/text%3E%3C/svg%3E">
 <script>
   if ("scrollRestoration" in history) { history.scrollRestoration = "manual"; }
@@ -507,13 +507,13 @@
 
 <header class="masthead">
   <div>
-    <span class="brand">EGCS · GENESYS CLOUD 遷移中心</span>
+    <span class="brand">GENESYS CLOUD 遷移中心</span>
     <h1>完整遷移流程</h1>
     <p>兩個入口共用同一條執行鏈路：手動任務需要人工確認，定時任務則會自動執行。</p>
   </div>
   <div class="masthead__side">
     <ul class="legend">
-      <li style="--c:var(--lane-ui)"><i></i>使用者操作<span>EGCS-UI</span></li>
+      <li style="--c:var(--lane-ui)"><i></i>使用者操作<span>UI</span></li>
       <li style="--c:var(--lane-engine)"><i></i>後端引擎<span>SyncEngine / Terraform</span></li>
       <li style="--c:var(--lane-target)"><i></i>Genesys Cloud<span>Org / 工作區</span></li>
     </ul>
@@ -530,7 +530,7 @@
   <ol class="rail__ticks" id="railTicks"></ol>
 </nav>
 
-<main class="viewport" id="viewport" tabindex="0" role="region" aria-label="EGCS 完整遷移流程，可橫向捲動檢視">
+<main class="viewport" id="viewport" tabindex="0" role="region" aria-label="完整遷移流程，可橫向捲動檢視">
   <div class="canvas" id="canvas">
     <svg class="wires" id="wires" xmlns="http://www.w3.org/2000/svg"></svg>
 
@@ -557,8 +557,8 @@
   "use strict";
 
   var LANES = [
-    { key: "ui", name: "使用者操作", sub: "EGCS-UI · Vue 3", color: "#2e5a6b" },
-    { key: "engine", name: "後端引擎", sub: "egcs-service · SyncEngine", color: "#6a4f3e" },
+    { key: "ui", name: "使用者操作", sub: "UI · Vue 3", color: "#2e5a6b" },
+    { key: "engine", name: "後端引擎", sub: "service · SyncEngine", color: "#6a4f3e" },
     { key: "target", name: "Genesys Cloud", sub: "目標 Org · 工作區", color: "#44654a" }
   ];
 
